@@ -1,15 +1,11 @@
 # hello-world-2
-Re learning github 
-feature branch from feature_1.
-and added feature_2 too .
-
-
-All changes done in feature_1 branch .
-
-Now all the changes are done in feature_2 branch .
+Work experience and College
 
 | Tasks | Organisation |
 | ------ | ------|
+| College | IITP |
 | Grafana | Samsung Research Institute Delhi |
+| Javascript | SRI-D |
+| NodeJS | SRI-D |
 | Boundary | Livspace |
 | Postman | SRI- Delhi | 
