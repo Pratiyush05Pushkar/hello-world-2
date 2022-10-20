@@ -1,8 +1,6 @@
 # hello-world-2
 Work experience and College
 
-Commiting from local feature_1 ....
-
 | Tasks | Organisation |
 | ------ | ------|
 | College | IITP |
