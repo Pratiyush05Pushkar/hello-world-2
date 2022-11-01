@@ -1,10 +1,7 @@
 name: learn-github-actions
 run-name: ${{ github.actor }} is learning GitHub Actions
 on:
-  push:
-    branches: [ 'main' ]
-    paths:
-      - Vault-secrets/**.yaml
+  push
 jobs:
   check-bats-version:
     runs-on: ubuntu-latest
@@ -12,7 +9,7 @@ jobs:
       - id: files
         uses: jitterbit/get-changed-files@v1
       - run: |
-          echo "${{ steps.files.outputs.removed }}" | grep 'Vault-secrets'
+          echo "${{ steps.files.outputs.removed }} | grep 'Vault-secrets' "
       - run: |
           ${{ steps.files.outputs.added_modified }} | grep 'Vault-secrets' > added_modified 
           for changed_file in added_modified 
