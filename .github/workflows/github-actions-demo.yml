@@ -12,10 +12,14 @@ jobs:
       - id: files
         uses: jitterbit/get-changed-files@v1
       - run: |
-          for changed_file in "${{ steps.files.outputs.removed }} | grep 'Vault-secrets'  ; " do
+          removed_files = ${{ steps.files.outputs.removed }} | grep 'Vault-secrets'
+          for changed_file in removed_files
+          do
             echo "Do something with this ${changed_file}."
           done
       - run: |
-          for changed_file in "${{ steps.files.outputs.added_modified }} | grep 'Vault-secrets' ; " do
+          added_modified = ${{ steps.files.outputs.added_modified }} | grep 'Vault-secrets'
+          for changed_file in added_modified 
+          do
             echo "Do something with this ${changed_file}."
           done
