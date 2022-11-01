@@ -12,8 +12,7 @@ jobs:
       - id: files
         uses: jitterbit/get-changed-files@v1
       - run: |
-          steps.files.outputs.removed | grep 'Vault-secrets' > removed_files
-          
+          "${{ steps.files.outputs.removed }}"
       - run: |
           ${{ steps.files.outputs.added_modified }} | grep 'Vault-secrets' > added_modified 
           for changed_file in added_modified 
