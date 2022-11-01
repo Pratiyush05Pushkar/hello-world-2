@@ -9,9 +9,11 @@ jobs:
   check-bats-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
+      - id: files
+        uses: jitterbit/get-changed-files@v1
         with:
-          node-version: '14'
-      - run: npm install -g bats
-      - run: bats -v
+          format: 'yaml'
+      - run: |
+          for changed_file in ${{ steps.files.outputs.all }}; do
+            echo "Do something with this ${changed_file}."
+          done
