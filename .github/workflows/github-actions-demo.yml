@@ -36,4 +36,11 @@ jobs:
           for file in ${{ steps.changed-files-specific.outputs.all_changed_files }} ; do 
             yq -o=json $file
           done
-          
+        
+      - name: Run this to read files changed in spc-yaml
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        run: |
+          for val in $( yq ".spec.parameters.objects" ${{ steps.changed-files-specific.outputs.all_changed_files }} ) ;
+          do
+              echo $( val.objectName )
+          done
