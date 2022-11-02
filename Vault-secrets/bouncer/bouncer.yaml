@@ -1,3 +1,13 @@
-data:
-  - bouncer: user-name_is_123
-  - key: value_is_this_124
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: vault-database
+spec:
+  provider: vault
+  parameters:
+    vaultAddress: "http://vault.default:8200"
+    roleName: "database"
+    objects: |
+      - objectName: "db-password"
+        secretPath: "secret/data/db-pass"
+        secretKey: "password"

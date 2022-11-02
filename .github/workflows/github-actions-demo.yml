@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # windows-latest | macos-latest
+    runs-on: self-hosted  # windows-latest | macos-latest
     name: Test changed-files
     steps:
       - uses: mikefarah/yq@master
@@ -30,7 +30,7 @@ jobs:
         uses: tj-actions/changed-files@v34
         with:
           files: |
-            Vault-secrets/**
+            Vault-secrets/bouncer/**
 
       - name: Run step if any file(s) in the Vault-secret folder change
         if: steps.changed-files-specific.outputs.any_changed == 'true'
