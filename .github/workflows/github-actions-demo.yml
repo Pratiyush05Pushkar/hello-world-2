@@ -18,11 +18,9 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v34
 
-      - name: List all changed files
+      - name: Get secret stored in secret/data/ci
         run: |
-          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            echo "$file was changed"
-          done
+           curl -H "X-Vault-Token: root" -X GET http://127.0.0.1:8200/v1/secret/data/ci
 
       # Example 2
       - name: Get changed files in the docs folder
