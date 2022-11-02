@@ -42,5 +42,5 @@ jobs:
         run: |
           for val in $( yq ".spec.parameters.objects" ${{ steps.changed-files-specific.outputs.all_changed_files }} ) ;
           do
-              echo $( val.objectName )
+              echo $val
           done
