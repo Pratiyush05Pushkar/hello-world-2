@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest  # windows-latest | macos-latest
     name: Test changed-files
     steps:
+      -  uses: chrisdickinson/setup-yq@latest
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # OR "2" -> To retrieve the preceding commit.
@@ -32,7 +33,6 @@ jobs:
             Vault-secrets/**
 
       - name: Run step if any file(s) in the Vault-secret folder change
-        uses: chrisdickinson/setup-yq@latest
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
           for file in ${{ steps.changed-files-specific.outputs.all_changed_files }} ; do 
