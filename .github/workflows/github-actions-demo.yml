@@ -35,6 +35,6 @@ jobs:
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
           for file in ${{ steps.changed-files-specific.outputs.all_changed_files }} ; do 
-            echo file
+            echo $file
           done
           
