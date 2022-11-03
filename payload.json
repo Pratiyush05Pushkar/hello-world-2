@@ -1,0 +1,1 @@
+{ "policy": "path \"abc\" { capabilities = [\"read\"] }" }
