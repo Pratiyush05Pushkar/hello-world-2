@@ -44,6 +44,7 @@ jobs:
           yq ".spec.parameters.objects" ${{ steps.changed-files-specific.outputs.all_changed_files }} > object.yaml
           for val in $( yq ".[].secretPath" object.yaml ) ;
           do
+              echo $val
               curl --header "X-Vault-Token: root" --request POST --data '{ "policy": "path \"'${val}'\" { capabilities = [\"read\"] }" }' http://127.0.0.1:8200/v1/sys/policy/my-policy
           done
           rm -f object.yaml
