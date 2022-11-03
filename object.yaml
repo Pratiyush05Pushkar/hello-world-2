@@ -1,0 +1,6 @@
+- objectName: "db-password"
+  secretPath: "secret/data/db-pass-45"
+  secretKey: "password"
+- objectName: "db-password-44"
+  secretPath: "secret/data/db-pass-44"
+  secretKey: "password-4"
