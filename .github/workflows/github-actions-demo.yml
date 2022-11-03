@@ -20,6 +20,7 @@ jobs:
 
       - name: Get secret stored in secret/data/ci
         run: |
+           pwd
            curl -H "X-Vault-Token: root" -X GET http://127.0.0.1:8200/v1/secret/data/ci
 
       # Example 2
@@ -41,8 +42,8 @@ jobs:
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
           yq ".spec.parameters.objects" ${{ steps.changed-files-specific.outputs.all_changed_files }} > object.yaml
-          for val in $( yq ".[0]" object.yaml ) ;
+          for val in $( yq "." object.yaml ) ;
           do
-              echo $val
+              echo $val.secretPath
           done
           rm -f object.yaml
