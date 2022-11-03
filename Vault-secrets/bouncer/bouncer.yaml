@@ -11,6 +11,6 @@ spec:
       - objectName: "db-password"
         secretPath: "secret/data/db-pass-454e3"
         secretKey: "password"
-      - objectName: "db-password-4554"
+      - objectName: "db-passwfdord-4554"
         secretPath: "secret/data/db-pass-42434"
         secretKey: "password-4"
