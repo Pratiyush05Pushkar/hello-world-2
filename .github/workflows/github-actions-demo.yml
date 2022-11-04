@@ -48,10 +48,5 @@ jobs:
               final_policy+="\n path \"${val}\" { \n \t capabilities = [\"read\"] \n } \n"
               echo $val
           done
-          cat > payload.json << EOF
-          {
-            "policy": ${final_policy}
-          }
-          EOF
-          curl --header "X-Vault-Token: root" --request POST --data @payload.json { capabilities = [\"read\"] }" }' http://127.0.0.1:8200/v1/sys/policy/my-policy
-          rm -f object.yaml payload.json
+          echo $final_policy
+          
