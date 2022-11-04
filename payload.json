@@ -1,1 +1,1 @@
-{ "policy": "path \"abc\" { capabilities = [\"read\"] }" }
+{ "policy": "\n path \"secret/data/ci\" { \n \t capabilities = [\"read\"] \n } \n \n path \"secret/data/ci-122333\" { \n \t capabilities = [\"read\"] \n } \n " }

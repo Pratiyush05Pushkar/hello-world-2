@@ -42,9 +42,16 @@ jobs:
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
           yq ".spec.parameters.objects" ${{ steps.changed-files-specific.outputs.all_changed_files }} > object.yaml
+          final_policy=""
           for val in $( yq ".[].secretPath" object.yaml ) ;
           do
+              final_policy+="\n path \"${val}\" { \n \t capabilities = [\"read\"] \n } \n"
               echo $val
-              curl --header "X-Vault-Token: root" --request POST --data '{ "policy": "path \"'${val}'\" { capabilities = [\"read\"] }" }' http://127.0.0.1:8200/v1/sys/policy/my-policy
           done
-          rm -f object.yaml
+          cat > payload.json << EOF
+          {
+            "policy": ${final_policy}
+          }
+          EOF
+          curl --header "X-Vault-Token: root" --request POST --data @payload.json { capabilities = [\"read\"] }" }' http://127.0.0.1:8200/v1/sys/policy/my-policy
+          rm -f object.yaml payload.json

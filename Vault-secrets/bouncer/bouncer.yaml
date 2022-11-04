@@ -9,8 +9,8 @@ spec:
     roleName: "database"
     objects: |
       - objectName: "db-password"
-        secretPath: "secret/data/db-pass-454"
+        secretPath: "secret/data/db-pass-checking_1"
         secretKey: "password"
       - objectName: "db-passwfdord-4554"
-        secretPath: "secret/data/db-pass-42434"
+        secretPath: "secret/data/db-pass-checking_1"
         secretKey: "password-4k"
