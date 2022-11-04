@@ -52,7 +52,7 @@ jobs:
           echo $final_policy
           cat > payload.json << EOF
           {
-            "policy": $final_policy
+            "policy": ${final_policy}
           }
           EOF
           cat payload.json
