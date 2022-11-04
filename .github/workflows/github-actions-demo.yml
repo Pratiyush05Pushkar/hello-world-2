@@ -48,7 +48,7 @@ jobs:
               final_policy+="\n path \"${val}\" { \n \t capabilities = [\"read\"] \n } \n"
               echo $val
           done
-          final_policy=\"final_policy\"
+          final_policy=\"$final_policy\"
           echo $final_policy
           cat > payload.json << EOF
           {
