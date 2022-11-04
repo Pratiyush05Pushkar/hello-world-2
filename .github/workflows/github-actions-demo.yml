@@ -45,7 +45,7 @@ jobs:
           final_policy=""
           for val in $( yq ".[].secretPath" object.yaml ) ;
           do
-              final_policy+="\n path \"${val}\" { \n \t capabilities = [\"read\"] \n } \n"
+              final_policy+="\n path \"${val}\" { \n \t capabilities = [\\\"read\\\"] \n } \n"
               echo $val
           done
           final_policy=\"$final_policy\"
