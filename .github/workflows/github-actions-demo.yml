@@ -25,7 +25,7 @@ jobs:
           yq ".spec.parameters.objects" ${{ steps.changed-files-specific.outputs.all_changed_files }} > object.yaml
           all_secret_paths=$(yq ".[].secretPath" object.yaml )
           final_policy=""
-          unique_secret_paths=$(echo "$all_secret_paths"|tr " " "\n"|sort|uniq|tr "\n" " ")
+          unique_secret_paths=$(echo "$all_secret_paths" |sort|uniq)
           for val in $unique_secret_paths ;
           do
               final_policy+="\n path \\\"${val}\\\" { \n \t capabilities = [\\\"read\\\"] \n } \n"
@@ -39,7 +39,7 @@ jobs:
           }
           EOF
           cat payload.json
-          curl --header "X-Vault-Token:$VAULT_TOKEN" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/my-policy
+          curl --header "X-Vault-Token: root" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/my-policy
           rm -f object.yaml payload.json
 
 
