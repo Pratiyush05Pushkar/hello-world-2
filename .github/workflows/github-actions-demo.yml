@@ -1,36 +1,17 @@
-name: learn-github-actions
-run-name: ${{ github.actor }} is learning GitHub Actions
-on:
-  push
-
-jobs:
+name: GitHub Actions Demo
+run-name: ${{ github.actor }} is automating policy and role creation
+on: [push]
+jobs:  
   build:
-    runs-on: self-hosted  # windows-latest | macos-latest
-    name: Test changed-files
+    runs-on: self-hosted
+    name: Github-actions-trial
     steps:
-      # - uses: mikefarah/yq@master
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # OR "2" -> To retrieve the preceding commit.
-
-      # Example 1
-      - name: Get changed files
-        id: changed-files
-        uses: tj-actions/changed-files@v34
-
-      - name: Get secret stored in secret/data/ci
-        run: |
-           pwd
-           curl -H "X-Vault-Token: root" -X GET http://127.0.0.1:8200/v1/secret/data/ci
-
-      # Example 2
       - name: Get changed files in the docs folder
         id: changed-files-specific
         uses: tj-actions/changed-files@v34
         with:
           files: |
             Vault-secrets/bouncer/**
-
       - name: Run step if any file(s) in the Vault-secret folder change
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
@@ -42,8 +23,10 @@ jobs:
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
           yq ".spec.parameters.objects" ${{ steps.changed-files-specific.outputs.all_changed_files }} > object.yaml
+          all_secret_paths=$(yq ".[].secretPath" object.yaml )
           final_policy=""
-          for val in $( yq ".[].secretPath" object.yaml ) ;
+          unique_secret_paths=$(echo "$all_secret_paths" |sort|uniq)
+          for val in $unique_secret_paths ;
           do
               final_policy+="\n path \\\"${val}\\\" { \n \t capabilities = [\\\"read\\\"] \n } \n"
               echo $val
@@ -56,6 +39,19 @@ jobs:
           }
           EOF
           cat payload.json
-          curl --header "X-Vault-Token: root" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/my-policy
+          policy_name="$(yq ".metadata.name" ${{ steps.changed-files-specific.outputs.all_changed_files }} )_policy"
+          role_name="$(yq ".metadata.name" ${{ steps.changed-files-specific.outputs.all_changed_files }} )_role"
+          service_account_name=$(yq ".metadata.labels.serviceAccountName" ${{ steps.changed-files-specific.outputs.all_changed_files }} )
+          curl --header "X-Vault-Token:root" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/$policy_name          
+          cat > payload.json << EOF
+          {
+            "name": "${role_name}",
+            "bound_service_account_names": "${service_account_name}",
+            "bound_service_account_namespaces": "default",
+            "token_policies": "${policy_name}"
+          }
+          EOF
+          cat payload.json
+          curl --header "X-Vault-Token:root" --request POST --data @payload.json http://127.0.0.1:8200/v1/auth/kubernetes/role/$role_name    
           rm -f object.yaml payload.json
-          
+
