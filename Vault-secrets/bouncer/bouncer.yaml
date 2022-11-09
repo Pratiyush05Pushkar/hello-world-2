@@ -19,10 +19,10 @@ spec:
         secretPath: "secret/data/dbname-1"
         secretKey: "password-1"
       - objectName: "db-username-2"
-        secretPath: "secret/data/dbname-2"
+        secretPath: "secret/data/dbname-21"
         secretKey: "username-2"
       - objectName: "db-password-3"
-        secretPath: "secret/data/dbname-3"
+        secretPath: "secret/data/dbname-31"
         secretKey: "password-3"
 
 
