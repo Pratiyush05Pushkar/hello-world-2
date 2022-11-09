@@ -48,7 +48,7 @@ jobs:
           policy_name="$(yq ".metadata.name" ${{ steps.changed-files-specific.outputs.all_changed_files }} )_policy"
           role_name="$(yq ".metadata.name" ${{ steps.changed-files-specific.outputs.all_changed_files }} )_role"
           service_account_name=$(yq ".metadata.labels.serviceAccountName" ${{ steps.changed-files-specific.outputs.all_changed_files }} )
-          curl --header "X-Vault-Token:root" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/$policy_name          
+          curl --header "X-Vault-Token:${{ secrets.VAULT_ROOT_TOKEN }}" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/$policy_name          
           cat > payload.json << EOF
           {
             "name": "${role_name}",
