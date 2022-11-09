@@ -1,10 +1,10 @@
 name: GitHub Actions Demo
 run-name: ${{ github.actor }} is automating policy and role creation
-on
+on:
   push:
     branches: [ 'main' ]
     paths:
-      - Vault-secrets/bouncer/*/*.yaml
+      - Vault-secrets/bouncer/**.yaml
 jobs:  
   build:
     runs-on: self-hosted
