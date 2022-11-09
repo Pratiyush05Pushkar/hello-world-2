@@ -4,7 +4,7 @@ on: [push]
 jobs:  
   build:
     runs-on: self-hosted
-    name: Github-actions-trial
+    name: Auto-policy-role-update
     steps:
       - name: Get changed files in the docs folder
         id: changed-files-specific
