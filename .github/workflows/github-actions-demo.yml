@@ -23,6 +23,7 @@ jobs:
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
           yq ".spec.parameters.objects" ${{ steps.changed-files-specific.outputs.all_changed_files }} > object.yaml
+          cat object.yaml
           all_secret_paths=$(yq ".[].secretPath" object.yaml )
           final_policy=""
           unique_secret_paths=$(echo "$all_secret_paths" |sort|uniq)
