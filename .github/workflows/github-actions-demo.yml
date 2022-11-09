@@ -26,6 +26,8 @@ jobs:
           all_secret_paths=$(yq ".[].secretPath" object.yaml )
           final_policy=""
           unique_secret_paths=$(echo "$all_secret_paths" |sort|uniq)
+          echo $all_secret_paths ;
+          echo $unique_secret_paths ;
           for val in $unique_secret_paths ;
           do
               final_policy+="\n path \\\"${val}\\\" { \n \t capabilities = [\\\"read\\\"] \n } \n"
