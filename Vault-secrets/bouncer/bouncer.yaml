@@ -5,7 +5,6 @@ metadata:
   namespace: prod # for making k8-role in vault
   labels: 
     serviceAccountName: ""
-
 spec:
   provider: vault
   parameters:
