@@ -6,11 +6,11 @@ jobs:
     runs-on: self-hosted
     name: Auto-policy-role-update
     steps:
-      - name: Get changed files in the docs folder
-        id: changed-files-specific
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0 
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
         uses: tj-actions/changed-files@v34
         with:
           files: |
