@@ -12,10 +12,10 @@ spec:
     roleName: "database"
     objects: |
       - objectName: "db-username-1" 
-        secretPath: "secret/data/dbname-121000"
+        secretPath: "secret/data/dbname-12100"
         secretKey: "username-1"
       - objectName: "db-password-1"
-        secretPath: "secret/data/dbname-121000"
+        secretPath: "secret/data/dbname-12100"
         secretKey: "password-1"
       - objectName: "db-username-2"
         secretPath: "secret/data/dbname-233313"
