@@ -1,10 +1,10 @@
-name: GitHub Actions 
-run-name: ${{ github.actor }} is trying to update policies 
+name: GitHub Actions Demo
+run-name: ${{ github.actor }} is automating policy and role creation
 on: [push]
 jobs:  
   build:
     runs-on: self-hosted
-    name: Auto-policy-update
+    name: Auto-policy-role-update
     steps:
       - name: Get changed files in the docs folder
         id: changed-files-specific
@@ -39,7 +39,19 @@ jobs:
           }
           EOF
           cat payload.json
-          curl --header "X-Vault-Token: root" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/my-policy
+          policy_name="$(yq ".metadata.name" ${{ steps.changed-files-specific.outputs.all_changed_files }} )_policy"
+          role_name="$(yq ".metadata.name" ${{ steps.changed-files-specific.outputs.all_changed_files }} )_role"
+          service_account_name=$(yq ".metadata.labels.serviceAccountName" ${{ steps.changed-files-specific.outputs.all_changed_files }} )
+          curl --header "X-Vault-Token:root" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/$policy_name          
+          cat > payload.json << EOF
+          {
+            "name": "${role_name}",
+            "bound_service_account_names": "${service_account_name}",
+            "bound_service_account_namespaces": "default",
+            "token_policies": "${policy_name}"
+          }
+          EOF
+          cat payload.json
+          curl --header "X-Vault-Token:root" --request POST --data @payload.json http://127.0.0.1:8200/v1/auth/kubernetes/role/$role_name    
           rm -f object.yaml payload.json
-
 
