@@ -1,11 +1,10 @@
 # in your job:
 name: MY GREAT JOB
-on: ['push']
+on: push
 jobs:
-  yq-example:
+  build:
     name: YQ example!
     runs-on: self-hosted
-
     steps:
     - uses: actions/checkout@v1
     - uses: chrisdickinson/setup-yq@latest
