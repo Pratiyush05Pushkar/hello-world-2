@@ -16,4 +16,5 @@ jobs:
               - Samsung: "Joined in 2021"
               - Livspace: "Joined in 2022"
         EOF
+        cat payload.yaml
         yq r payload.yaml '.name'
