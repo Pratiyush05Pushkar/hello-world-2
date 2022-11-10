@@ -11,7 +11,7 @@ spec:
     vaultAddress: "http://vault.default:8200"
     roleName: "database"
     objects: |
-      - objectName: "db-username-1" 
+      - objectName: "db-username1" 
         secretPath: "secret/data/dbname-1210"
         secretKey: "username-1"
       - objectName: "db-password-1"
