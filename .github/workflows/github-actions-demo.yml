@@ -10,6 +10,7 @@ jobs:
     runs-on: self-hosted
     name: Auto-policy-role-update
     steps:
+      - uses: mikefarah/yq@master
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 
