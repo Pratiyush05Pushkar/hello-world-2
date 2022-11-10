@@ -12,9 +12,20 @@ jobs:
       run: |
         cat > payload.yaml << EOF
           name: Pratiyush
-          tasks:
-              - Samsung: "Joined in 2021"
-              - Livspace: "Joined in 2022"
+          objects: |
+            - objectName: "db-username1" 
+              secretPath: "secret/data/dbname-1210"
+              secretKey: "username-1"
+            - objectName: "db-password-1"
+              secretPath: "secret/data/dbname-1210"
+              secretKey: "password-1"
+            - objectName: "db-username-2"
+              secretPath: "secret/data/dbname-233313"
+              secretKey: "username-2"
+            - objectName: "db-password-3"
+              secretPath: "secret/data/dbname-312"
+              secretKey: "password-3"
         EOF
         cat payload.yaml
-        yq r payload.yaml 'tasks'
+        yq r payload.yaml 'objects' > object.yaml
+        cat object.yaml
