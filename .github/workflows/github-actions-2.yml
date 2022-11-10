@@ -26,6 +26,6 @@ jobs:
               secretPath: "secret/data/dbname-312"
               secretKey: "password-3"
         EOF
-        cat payload.yaml
         yq r payload.yaml 'objects' > object.yaml
         cat object.yaml
+        yq r object.yaml '[].secretPath'
