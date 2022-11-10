@@ -17,4 +17,4 @@ jobs:
               - Livspace: "Joined in 2022"
         EOF
         cat payload.yaml
-        yq r payload.yaml '.name'
+        yq r payload.yaml 'name'
