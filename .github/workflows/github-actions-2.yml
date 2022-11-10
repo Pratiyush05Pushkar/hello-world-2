@@ -8,6 +8,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - uses: chrisdickinson/setup-yq@latest
-    - name: Show folks how to run YQ:
+    - name: Show folks how to run YQ-
       run: |
         yq --help
