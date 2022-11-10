@@ -10,4 +10,10 @@ jobs:
     - uses: chrisdickinson/setup-yq@latest
     - name: Show folks how to run YQ-
       run: |
-        yq --help
+        cat > payload.yaml << EOF
+          name: Pratiyush
+          tasks:
+              - Samsung: "Joined in 2021"
+              - Livspace: "Joined in 2022"
+        EOF
+        yq r payload.yaml '.name'
