@@ -10,7 +10,9 @@ jobs:
     runs-on: self-hosted
     name: Auto-policy-role-update
     steps:
-      - uses: chrisdickinson/setup-yq@latest
+      - name: Install yq
+        id: setup-yq
+        uses: shiipou/setup-yq-action@v2.2.0
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 
