@@ -1,0 +1,14 @@
+# in your job:
+name: MY GREAT JOB
+on: ['push']
+jobs:
+  yq-example:
+    name: YQ example!
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v1
+    - uses: chrisdickinson/setup-yq@latest
+    - name: Show folks how to run YQ:
+      run: |
+        yq --help
