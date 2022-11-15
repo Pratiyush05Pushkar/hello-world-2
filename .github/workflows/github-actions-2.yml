@@ -10,6 +10,7 @@ jobs:
     - uses: chrisdickinson/setup-yq@latest
     - name: Show folks how to run YQ-
       run: |
+        yq --help
         cat > payload.yaml << EOF
           name: Pratiyush
           objects: |
