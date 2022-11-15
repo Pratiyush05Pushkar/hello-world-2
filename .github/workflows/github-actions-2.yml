@@ -26,6 +26,22 @@ jobs:
               secretPath: "secret/data/dbname-312"
               secretKey: "password-3"
         EOF
-        yq r payload.yaml 'objects' > object.yaml
+        cat > payload_1.yaml << EOF
+          name: Pratiyush
+          objects: |
+            - objectName: "db-username1" 
+              secretPath: "secret/data/dbname-1"
+              secretKey: "username-1"
+            - objectName: "db-password-1"
+              secretPath: "secret/data/dbname-1"
+              secretKey: "password-1"
+            - objectName: "db-username-2"
+              secretPath: "secret/data/dbname-23"
+              secretKey: "username-2"
+            - objectName: "db-password-3"
+              secretPath: "secret/data/dbname-3"
+              secretKey: "password-3"
+        EOF
+        yq r payload.yaml payload_1 'objects' > object.yaml
         cat object.yaml
         yq r object.yaml '[].secretPath'
