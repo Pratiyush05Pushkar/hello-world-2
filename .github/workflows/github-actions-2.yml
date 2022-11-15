@@ -46,8 +46,8 @@ jobs:
         arr=(payload.yaml payload_1.yaml)
         for val in ${arr[@]}
         do
-          echo $val
+          yq r $val 'objects' >> object.yaml
         done
-        yq r payload.yaml payload_1 'objects' > object.yaml
+        
         cat object.yaml
         yq r object.yaml '[].secretPath'
