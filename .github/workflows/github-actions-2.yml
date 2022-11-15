@@ -44,7 +44,7 @@ jobs:
               secretKey: "password-3"
         EOF
         arr=("payload.yaml" "payload_1.yaml")
-        for val in $arr 
+        for val in $(arr[@])
         do
           echo $val
         done
