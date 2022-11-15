@@ -43,6 +43,11 @@ jobs:
               secretPath: "secret/data/dbname-3"
               secretKey: "password-3"
         EOF
+        arr =[ "payload.yaml" , "payload_1.yaml" ]
+        for val in arr 
+        do
+          echo $val
+        done
         yq r payload.yaml payload_1 'objects' > object.yaml
         cat object.yaml
         yq r object.yaml '[].secretPath'
