@@ -43,7 +43,7 @@ jobs:
               secretPath: "secret/data/dbname-3"
               secretKey: "password-3"
         EOF
-        arr=(payload.yaml payload_1.yaml)
+        arr=("payload.yaml" "payload_1.yaml")
         for val in $arr 
         do
           echo $val
