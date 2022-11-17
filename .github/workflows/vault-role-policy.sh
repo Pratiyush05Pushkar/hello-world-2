@@ -1,4 +1,4 @@
-#!/bin/shell
+#!/bin/bash
 
 for val in $1 ;
 do 
