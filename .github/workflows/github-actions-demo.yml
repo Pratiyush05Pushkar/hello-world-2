@@ -48,9 +48,7 @@ jobs:
                 policy_name="$(yq r $val "metadata.name" )_policy"
                 role_name="$(yq r $val "metadata.name" )_role"
                 service_account_name=$(yq r $val "metadata.labels.serviceAccountName" )
-                service_namespace=$(yq r $val "metadata.labels.namespace" )
-                //curl --header "X-Vault-Token:${{ secrets.VAULT_POLICY_UPDATE_TOKEN }}" --request POST --data @payload.json https://vault.eng.livspace.com/v1/sys/policy/apps/$policy_name          
-                echo "{ \n \"name\": \"${role_name}\" , \"bound_service_account_namespaces\": \"${service_account_name}\" , \"bound_service_account_namespaces\": \"${service_namespace}\" , \"token_policies\" : \"${policy_name}\" \n}" > payload.json
+                service_namespace=$(yq r $val "metadata.labels.namespace" )echo "{ \n \"name\": \"${role_name}\" , \"bound_service_account_namespaces\": \"${service_account_name}\" , \"bound_service_account_namespaces\": \"${service_namespace}\" , \"token_policies\" : \"${policy_name}\" \n}" > payload.json
                 
                 cat payload.json
                 curl --header "X-Vault-Token:${{ secrets.VAULT_POLICY_UPDATE_TOKEN }}" --request POST --data @payload.json https://vault.eng.livspace.com/v1/auth/kubernetes/role/$role_name    
