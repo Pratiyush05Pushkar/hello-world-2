@@ -43,7 +43,7 @@ jobs:
                 done
                 final_policy=\"$final_policy\"
                 echo $final_policy
-                echo "{ \n \"policy\": ${final_policy} \n}" > payload.json
+                echo "{ \"policy\": ${final_policy} }" > payload.json
                 cat payload.json
                 curl --header "X-Vault-Token:root" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/apps/ABC
             done
