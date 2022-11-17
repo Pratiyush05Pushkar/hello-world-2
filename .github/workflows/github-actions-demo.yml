@@ -46,7 +46,6 @@ jobs:
                 echo "{ \n \"policy\": ${final_policy} \n}" > payload.json
                 cat payload.json
                 curl --header "X-Vault-Token:root" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/apps/ABC
-                rm -f object.yaml payload.json
             done
         
           

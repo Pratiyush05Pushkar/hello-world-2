@@ -21,7 +21,7 @@ spec:
         secretPath: "secret/datfda/dbnadme-233d313"
         secretKey: "usernamed-2"
       - objectName: "db-password-3"
-        secretPath: "secret/data/dbname-31d2"
+        secretPath: "secret/data/dbname-311d2"
         secretKey: "password-3"
 
 
