@@ -25,6 +25,7 @@ jobs:
       # Prints the changes when done / added - Git Actions does not run when file is removed ******
       - name: Run this to read files changed in spc-yaml
         if: steps.changed-files-specific.outputs.any_changed == 'true'
-        run: ./vault-role-policy.sh ${{ steps.changed-files-specific.outputs.all_changed_files }}
+        run: ./.github/workflows/vault-role-policy.sh ${{ steps.changed-files-specific.outputs.all_changed_files }}
+        shell: bash
           
 
