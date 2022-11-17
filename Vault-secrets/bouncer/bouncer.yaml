@@ -15,13 +15,13 @@ spec:
         secretPath: "secret/data/dbname-1210"
         secretKey: "username-1"
       - objectName: "db-password-1"
-        secretPath: "secret/data/dbname-12ddd10"
+        secretPath: "secret/data/dbname-12dddd10"
         secretKey: "password-1"
       - objectName: "dxb-usernamef-2"
-        secretPath: "secret/datfda/dbnadme-233313"
+        secretPath: "secret/datfda/dbnadme-233d313"
         secretKey: "usernamed-2"
       - objectName: "db-password-3"
-        secretPath: "secret/data/dbname-312"
+        secretPath: "secret/data/dbname-31d2"
         secretKey: "password-3"
 
 
