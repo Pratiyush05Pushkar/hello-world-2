@@ -1,4 +1,4 @@
-path: "path_to_secret",
+path: "path_to1_secret",
 data:
     - k1: "v1"
     - k2: "v212"
