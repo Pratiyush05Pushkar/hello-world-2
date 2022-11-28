@@ -1,4 +1,4 @@
-path: "path_tod1sd_secret",
+path: "path_tod1sds_secret",
 data:
     - k1: "v1"
     - k2: "v12"
