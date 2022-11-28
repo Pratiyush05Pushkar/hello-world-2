@@ -1,4 +1,4 @@
 path: "path_to_secret",
 data:
     - k1: "v11"
-    - k2: "v2"
+    - k2: "v12"
