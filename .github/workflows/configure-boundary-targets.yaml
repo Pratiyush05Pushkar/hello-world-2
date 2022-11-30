@@ -7,6 +7,7 @@ jobs:
     name: Put targets on boundary
     steps:
       - uses: chrisdickinson/setup-yq@latest
+      - uses: sergeysova/jq-action@v2
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 
@@ -26,9 +27,10 @@ jobs:
       - name: Run this to read files changed in spc-yaml
         run: |
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
-            response=$(curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_mfA94ktoY8:authenticate)
-            echo $response
-            rm -f payload.json
+            curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_mfA94ktoY8:authenticate > response.json
+            token=$(jq -r '.attributes.token' response.json)
+            echo $token
+            rm -f payload.json response.json
             
         
           
