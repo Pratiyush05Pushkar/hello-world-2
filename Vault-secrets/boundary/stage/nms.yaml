@@ -1,0 +1,11 @@
+project: stage
+host-catalog:
+        name: nms
+        description: nms_service_description /optional
+        host-sets:
+              - name: nms_microservice_1
+                description: describe nms_microservice_1 /optional
+                hosts:
+                    - name: host_name
+                      description: describe host_name /optional
+                      address: IP_address

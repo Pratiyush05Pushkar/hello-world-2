@@ -1,0 +1,35 @@
+name: GitHub Actions Demo
+run-name: Put KV secrets in vault
+on: push
+jobs:  
+  build:
+    runs-on: self-hosted
+    name: Put targets on boundary
+    steps:
+      - uses: chrisdickinson/setup-yq@latest
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v34
+        with:
+          files: |
+            Vault-secrets/vault_secrets/**
+      # - name: Run step if any file(s) in the Vault-secret folder change
+      #   if: steps.changed-files-specific.outputs.any_changed == 'true'
+      #   run: |
+      #     for file in ${{ steps.changed-files-specific.outputs.all_changed_files }} ; do 
+      #       yq -o=json $file
+      #     done
+      # Prints the changes when done / added - Git Actions does not run when file is removed ******
+      - name: Run this to read files changed in spc-yaml
+        run: |
+            echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
+            response=$(curl --request POST --data @payload.json http://127.0.0.1:9200/v1/auth-methods/ampw_mfA94ktoY8:authenticate)
+            echo $response
+            rm -f payload.json
+            
+        
+          
+
