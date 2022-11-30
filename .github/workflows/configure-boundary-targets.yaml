@@ -34,7 +34,7 @@ jobs:
             host_catalog_description="nms-1 description"
             project_name="stage"
             project_id=""
-            if ["${project_name}" == "stage"]
+            if [ $project_name == "stage" ]
             then
               project_id="p_uz5ahCZ4XZ"
             else
