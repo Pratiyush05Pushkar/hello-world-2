@@ -32,7 +32,15 @@ jobs:
             echo $token
             host_catalog_name="nms"
             host_catalog_description="nms description"
-            echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"p_uz5ahCZ4XZ\"}" > host_catalog.json
+            project_name="stage"
+            project_id=""
+            if ["$project_name" == "stage"]
+            then
+              project_id="p_uz5ahCZ4XZ"
+            else
+              project_id="p_HHH0VG8hDM"
+            fi
+            echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
             cat host_catalog.json
             curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs
             rm -f payload.json host_catalog.json
