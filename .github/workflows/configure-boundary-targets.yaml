@@ -30,6 +30,10 @@ jobs:
             curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_mfA94ktoY8:authenticate > response.json
             token=$(jq -r '.attributes.token' response.json)
             echo $token
+            host-catalog-name="nms"
+            host-catalog-description="nms description"
+            echo "{\"type\":\"static\",\"name\":${host-catalog-name},\"description\":${host-catalog-description},\"scope_id\":\"p_uz5ahCZ4XZ\"}" > host-catalog.json
+            curl --header 'Authorization: Bearer ${token}' --request POST --data @host-catalog.json http://boundary-release.default:9200/v1/host-catalogs
             rm -f payload.json response.json
             
         
