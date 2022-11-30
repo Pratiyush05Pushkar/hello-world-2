@@ -1,5 +1,5 @@
 name: GitHub Actions Demo
-run-name: Put KV secrets in vault
+run-name: Add targets in boundary
 on: push
 jobs:  
   build:
@@ -26,7 +26,7 @@ jobs:
       - name: Run this to read files changed in spc-yaml
         run: |
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
-            response=$(curl --request POST --data @payload.json http://127.0.0.1:9200/v1/auth-methods/ampw_mfA94ktoY8:authenticate)
+            response=$(curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_mfA94ktoY8:authenticate)
             echo $response
             rm -f payload.json
             
