@@ -30,11 +30,11 @@ jobs:
             curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_mfA94ktoY8:authenticate > response.json
             token=$(jq -r '.attributes.token' response.json)
             echo $token
-            host_catalog_name="nms"
-            host_catalog_description="nms description"
+            host_catalog_name="nms-1"
+            host_catalog_description="nms-1 description"
             project_name="stage"
             project_id=""
-            if ["$project_name" == "stage"]
+            if ["${project_name}" == "stage"]
             then
               project_id="p_uz5ahCZ4XZ"
             else
