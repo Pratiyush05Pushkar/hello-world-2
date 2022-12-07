@@ -1,6 +1,8 @@
 name: Vault-token create
 run-name: Vault-token recreate
-on: push
+on:
+  schedule:
+    - cron: '*/5 * * * *'
 jobs:  
   build:
     runs-on: self-hosted
