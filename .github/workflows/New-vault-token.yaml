@@ -1,6 +1,8 @@
 name: Vault-token create
 run-name: Vault-token recreate
-on: push
+on:
+  schedule:
+    - cron: '5 * * * *'
 jobs:  
   build:
     runs-on: self-hosted
@@ -14,9 +16,8 @@ jobs:
       
       - name: Run this to read files changed in spc-yaml
         run: |
-            echo "{ \"policies\": [\"nms-boundary\"] }" > payload.json
-            curl --header "X-Vault-Token: hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @payload.json http://vault.default:8200/v1/auth/token/create
-            echo "${{ secrets.VAULT_CREATE_TOKEN}}"
+            curl --header "X-Vault-Token: ${{ secrets.VAULT_CREATE_TOKEN }}" --request POST http://vault.default:8200/v1/auth/token/renew-self
+            
             
 
             
