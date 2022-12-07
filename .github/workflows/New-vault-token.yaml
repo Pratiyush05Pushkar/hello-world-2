@@ -16,6 +16,7 @@ jobs:
         run: |
             echo "{ \"policies\": [\"nms-boundary\"] }" > payload.json
             curl --header "X-Vault-Token: hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @payload.json http://vault.default:8200/v1/auth/token/create
+            echo "${{ secrets.VAULT_CREATE_TOKEN}}"
             
 
             
