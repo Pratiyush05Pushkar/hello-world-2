@@ -15,7 +15,7 @@ jobs:
       - name: Run this to read files changed in spc-yaml
         run: |
             echo "{ \"policies\": [\"nms-boundary\"] }" > payload.json
-            curl --header "X-Vault-Token: hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @payload.json http://127.0.0.1:8200/v1/auth/token/create
+            curl --header "X-Vault-Token: hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @payload.json http://vault.default:8200/v1/auth/token/create
             
 
             
