@@ -1,5 +1,5 @@
 name: Vault-token create
-run-name: Add targets in boundary
+run-name: Vault-token recreate
 on: push
 jobs:  
   build:
