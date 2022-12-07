@@ -1,0 +1,26 @@
+name: Vault-token create
+run-name: Add targets in boundary
+on:
+  schedule:
+    - cron : '0 0 1 * *'
+jobs:  
+  build:
+    runs-on: self-hosted
+    name: Replace vault token with new one
+    steps:
+      - uses: chrisdickinson/setup-yq@latest
+      - uses: sergeysova/jq-action@v2
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+      
+      - name: Run this to read files changed in spc-yaml
+        run: |
+            echo "{ \"policies\": [\"nms-boundary\"] }" > payload.json
+            curl --header "X-Vault-Token: hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @payload.json http://127.0.0.1:8200/v1/auth/token/create
+            
+
+            
+        
+          
+
