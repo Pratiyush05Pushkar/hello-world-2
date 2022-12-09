@@ -34,10 +34,8 @@ jobs:
             echo $token
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} ;
             do 
-                echo $val
                 #get project id
                 project_name=$(yq ".project" $val)
-                echo $new_host_set_list
                 project_id=""
                 if [ $project_name == "stage" ]
                 then
@@ -71,12 +69,17 @@ jobs:
 
 
                 diff_host_set=$(echo $old_host_set_list $new_host_set_list | sort | uniq -u )
+                
+                
                 for diff_hs in $diff_host_set;
                 do
                     if [ ! $(echo $old_host_set_list | grep -q diff_hs ; echo $? ) ] ;then
                           echo Needs to be deleted 
                     else
-                          echo New
+                          for each_hs in $(hs=$diff_hs yq '.host-catalog.host-sets[] | select(.name==env(hs))' $val);
+                          do
+                              echo $(yq '.target.name' each_hs)
+                          done
                     fi 
                 done 
 
