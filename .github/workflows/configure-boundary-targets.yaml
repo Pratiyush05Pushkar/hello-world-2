@@ -54,7 +54,6 @@ jobs:
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
                 host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
                 
-                echo $host_catalog_id
                 if [ -z "$host_catalog_id" ]; then
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
                   host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs | jq '.id' )
@@ -63,10 +62,11 @@ jobs:
                 
                 #get host-set list which is already present 
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_set.json
-                old_host_set_list=$(jq -r '.|select(.item).items[].name' all_host_set.json)
+                cat all_host_set.json
+                old_host_set_list=$(jq -r '. | select(.item) | .items[].name' all_host_set.json)
 
                 #host-sets in yaml file 
-                new_host_set_list=$(yq r $val "host-catalog.host-sets.[].name")
+                new_host_set_list=$(yq r $val "host-catalog.host-sets[].name")
 
                 cat old_host_set_list new_host_set_list | sort | uniq -u 
 
