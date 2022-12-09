@@ -70,7 +70,9 @@ jobs:
 
                 diff_host_set=$(echo $old_host_set_list $new_host_set_list | sort | uniq -u )
                 
-                echo $old_host_set_list $new_host_set_list $diff_host_set
+                echo OLD_list $old_host_set_list 
+                echo New list $new_host_set_list 
+                echo diff $diff_host_set
                 for diff_hs in $diff_host_set;
                 do
                     if [ ! $(echo $old_host_set_list | grep -q diff_hs ; echo $? ) ] ;then

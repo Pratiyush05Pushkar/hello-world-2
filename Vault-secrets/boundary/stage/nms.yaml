@@ -13,7 +13,7 @@ host-catalog:
                   hosts:
                       name: host_name_1.1
                       description: descib host_ame_1.1 /optional
-                      address: IP_address_1.1
+                      address: IP_adress_1.1
                       username: 
                       password: 
                 - name: host_nae_2.1_set
