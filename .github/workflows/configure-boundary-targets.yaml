@@ -74,10 +74,10 @@ jobs:
                 echo diff $diff_host_set
                 for diff_hs in $diff_host_set;
                 do
-                    if [ ! $(echo $old_host_set_list | grep -q diff_hs ; echo $? ) ] ;then
+                    if [ ! $(echo $old_host_set_list | grep -q $diff_hs ; echo $? ) ] ;then
                           #deleted host-sets in recent git push
                           echo Needs to be deleted 
-                    else
+                    else if 
                           echo diff_val $diff_hs
                           #newly created host-sets in recent git push
                           hs=$diff_hs yq '.host-catalog.host-sets[] | select(.name==env(hs))' $val > data.yaml
