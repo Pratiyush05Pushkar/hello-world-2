@@ -70,7 +70,7 @@ jobs:
                 new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
 
                 echo $host_catalog_id $project_id
-                echo old_host_set_list new_host_set_list | sort | uniq -u 
+                echo $old_host_set_list $new_host_set_list | sort | uniq -u 
 
 
             done
