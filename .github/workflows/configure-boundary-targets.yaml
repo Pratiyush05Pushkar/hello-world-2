@@ -46,19 +46,16 @@ jobs:
                   project_id="p_HBZMfr6PcE"
                 fi
 
-                echo get host-catalog
+                #get host-catalog
                 host_catalog_name="nms" #$(yq r $val "host-catalog.name")
                 host_catalog_description=$(yq r $val "host-catalog.description")
                 
-                echo $project_id $host_catalog_name $host_catalog_description
-                echo create host-catalog if not present already
-                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id > host-catalogs.json
-                echo $(jq -r '.items[].name' host-catalogs.json) 
-                hclist=$(jq -r '.items[].name' host-catalogs.json)
                 
-                echo $hclist
-                echo $hclist | grep -q $host_catalog_name ; echo $?
-                if [ $(echo hclist | grep -q $host_catalog_name ; echo $?) ] ; then
+                #create host-catalog if not present already
+                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
+                host_catalog_list=$(jq -r '.items[].name' all_host_catalogs.json)
+                
+                if [ $(echo $host_catalog_list | grep -q $host_catalog_name ; echo $?) ] ; then
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
                   curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs
                   rm -f host_catalog.json
