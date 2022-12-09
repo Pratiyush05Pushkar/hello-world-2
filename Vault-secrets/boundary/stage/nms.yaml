@@ -1,6 +1,6 @@
 project: stage
 host-catalog:
-          name: service_60
+          name: service
           description: nms_service_description /optional
           host-sets:
                 - name: host_name_1.1_set
