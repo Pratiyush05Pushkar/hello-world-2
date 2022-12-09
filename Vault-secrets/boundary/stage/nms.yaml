@@ -6,7 +6,7 @@ host-catalog:
                 - name: host_name_1.1_set
                   description: describ nm_icroservie_1 /optional
                   target:
-                      name: host_name_1.1_target
+                      name: host_na1me_1.1_target
                       description:
                       max_connection: -1
                       default_port: 
