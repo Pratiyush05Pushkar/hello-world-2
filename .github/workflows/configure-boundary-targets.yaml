@@ -69,8 +69,9 @@ jobs:
                 #host-sets in yaml file 
                 new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
 
-                echo $host_catalog_id $project_id
-                echo $old_host_set_list $new_host_set_list | sort | uniq -u 
+
+                diff_host_set=$(echo $old_host_set_list $new_host_set_list | sort | uniq -u )
+                echo $diff_host_set 
 
 
             done
