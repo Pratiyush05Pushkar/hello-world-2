@@ -37,7 +37,6 @@ jobs:
                 echo $val
                 #get project id
                 project_name=$(yq ".project" $val)
-                new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
                 echo $new_host_set_list
                 project_id=""
                 if [ $project_name == "stage" ]
@@ -71,7 +70,7 @@ jobs:
                 new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
 
                 echo $host_catalog_id $project_id
-                cat old_host_set_list new_host_set_list | sort | uniq -u 
+                echo old_host_set_list new_host_set_list | sort | uniq -u 
 
 
             done
