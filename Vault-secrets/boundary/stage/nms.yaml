@@ -3,26 +3,26 @@ host-catalog:
           name: service_234
           description: nms_servicederpton/optio
           host-sets:
-                - name: host_namy_1_set
+                - name: host_nay_1_set
                   description: descri ns_icroservie_1 /optional
                   target:
-                      name: host_namy_1_target
+                      name: host_nay_1_target
                       description: deded
                       default_port: 3306
                   hosts:
-                      name: host_namy_1
+                      name: host_nay_1
                       description: deb os_me_1.1 /optional
                       address: livspace-staging-mysql5.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username: 
                       password: 
-                - name: host_namy_2_set
+                - name: host_nay_2_set
                   description: descr microervice_2 /optional
                   target:
-                      name: host_namy_2_target
+                      name: host_nay_2_target
                       description: dedede
                       default_port: 3306
                   hosts:
-                      name: host_namy_2
+                      name: host_nay_2
                       description: descri hst_name_2 /optional
                       address: livspace-dev-mysql8-cluster.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username:
