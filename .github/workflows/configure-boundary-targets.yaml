@@ -28,7 +28,6 @@ jobs:
       # Prints the changes when done / added - Git Actions does not run when file is removed ******
       - name: To upload targets 
         run: |
-            jq --help
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
             curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_sC1BbzThIj:authenticate > response.json
             token=$(jq -r '.attributes.token' response.json)
@@ -46,20 +45,24 @@ jobs:
                   project_id="p_HBZMfr6PcE"
                 fi
 
-                #get host-catalog
-                host_catalog_name="nms" #$(yq r $val "host-catalog.name")
+                #read host-catalog from yaml file 
+                host_catalog_name="nms-22" #$(yq r $val "host-catalog.name")
                 host_catalog_description=$(yq r $val "host-catalog.description")
                 
                 
-                #create host-catalog if not present already
+                #get host-catalog list
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
-                host_catalog_list=$(jq -r '.items[].name' all_host_catalogs.json)
+                host_catalog_id=$(jq -r '.items[] | select(.name==$host_catalog_name) | .id' all_host_catalogs.json)
                 
-                if [ $(echo $host_catalog_list | grep -q $host_catalog_name ; echo $?) ] ; then
+                if [ -z "$host_catalog_id" ];; then
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
-                  curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs
+                  curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs 
                   rm -f host_catalog.json
                 fi
+                
+                #get host-set list which is already present 
+
+
             done
             
         
