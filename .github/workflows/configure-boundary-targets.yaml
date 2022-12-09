@@ -51,9 +51,9 @@ jobs:
                 
                 echo $project_id $host_catalog_name $host_catalog_description
                 echo create host-catalog if not present already
-                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id
-                echo reached here
+                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id > host-catalogs.json
                 host-catalogs-list=$(jq .items[].name host-catalogs.json -r)
+                echo $host-catalogs-list
                 if [ $(echo host-catalogs-list | grep -q $host_catalog_name ; echo $?) ] ; then
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
                   curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs
