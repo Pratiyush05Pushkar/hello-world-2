@@ -63,12 +63,16 @@ jobs:
                 
                 #get host-set list which is already present 
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_set.json
-                old_host_set_list=$(jq -r '.items[].name' all_host_set.json)
-
+                old_host_set_list=""
+                if [ -s all_host_set.json ]
+                then
+                    old_host_set_list=$(jq -r '.items[].name' all_host_set.json)
+                fi
+                
                 #host-sets in yaml file 
                 new_host_set_list=$(yq r $val "host-catalog.host-sets.[].name")
 
-                cat old_host_set_list new_host_set_list | sort | uniq -u > diff_host_sets
+                cat old_host_set_list new_host_set_list | sort | uniq -u 
 
 
             done
