@@ -34,6 +34,7 @@ jobs:
             echo $token
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} ;
             do 
+                echo $val
                 #get project id
                 project_name=$(yq r $val "project")
                 project_id=""
@@ -44,6 +45,7 @@ jobs:
                   project_id="p_HBZMfr6PcE"
                 fi
 
+                echo present-here-1
                 #get host-catalog
                 host_catalog_name="nms" #$(yq r $val "host-catalog.name")
                 host_catalog_description=$(yq r $val "host-catalog.description")
