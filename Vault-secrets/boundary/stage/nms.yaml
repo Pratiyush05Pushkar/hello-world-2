@@ -26,6 +26,6 @@ host-catalog:
                   hosts:
                       name: host_name_2.1
                       description: describ host_name_2 /optional
-                      address: IP_address_2
+                      address: IP_addess_2
                       username:
                       password:

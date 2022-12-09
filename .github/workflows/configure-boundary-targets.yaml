@@ -68,7 +68,7 @@ jobs:
                 new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
 
 
-                diff_host_set=$(echo $old_host_set_list $new_host_set_list | sort | uniq -u )
+                diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
                 
                 echo OLD_list $old_host_set_list 
                 echo New list $new_host_set_list 
