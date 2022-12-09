@@ -8,7 +8,7 @@ jobs:
     runs-on: self-hosted
     name: Put targets in boundary
     steps:
-      - uses: chrisdickinson/setup-yq@latest
+      - uses: dcarbone/install-yq-action@v1.0.0
       - uses: dcarbone/install-jq-action@v1.0.1
       - uses: actions/checkout@v3
         with:
@@ -28,6 +28,7 @@ jobs:
       # Prints the changes when done / added - Git Actions does not run when file is removed ******
       - name: To upload targets 
         run: |
+            yq --help
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
             curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_sC1BbzThIj:authenticate > response.json
             token=$(jq -r '.attributes.token' response.json)
