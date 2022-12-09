@@ -46,7 +46,7 @@ jobs:
                 fi
 
                 #read host-catalog from yaml file 
-                host_catalog_name="nms-22" #$(yq r $val "host-catalog.name")
+                host_catalog_name=$(yq r $val "host-catalog.name")
                 host_catalog_description=$(yq r $val "host-catalog.description")
                 
                 
