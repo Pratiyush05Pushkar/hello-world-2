@@ -16,7 +16,7 @@ host-catalog:
                       username: 
                       password: 
                 - name: host_nam_2_set
-                  description: descr n_microervice_2 /optional
+                  description: descr nmicroervice_2 /optional
                   target:
                       name: host_nam_2_target
                       description: dedede

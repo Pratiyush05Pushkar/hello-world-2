@@ -80,14 +80,14 @@ jobs:
                     else
                           #newly created host-sets in recent git push
                           hs=$diff_hs yq '.host-catalog.host-sets[] | select(.name==env(hs))' $val > data.yaml
-
+                          
                           #create host-set
                           host_set_name=$(yq ".name" data.yaml)
                           host_set_description=$(yq ".description" data.yaml)
                           echo "{\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_set_name}\",\"description\":\"${host_set_description}\"}" > new_host_set.json
                           host_set_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @new_host_set.json http://boundary-release.default:9200/v1/host-sets | jq '.id' )
                           rm -f new_host_set.json
-
+                          
                           #create host
                           host_name=$(yq ".hosts.name" data.yaml)
                           host_description=$(yq ".hosts.description" data.yaml)
@@ -97,14 +97,14 @@ jobs:
                           echo "{\"attributes\":{\"address\":\"${host_ip}\"},\"type\":\"static\",\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_name}\",\"description\":\"${host_description}\"}" > host.json
                           host_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host.json http://boundary-release.default:9200/v1/hosts | jq '.id' )
                           rm -f host.json
-
+                          
                           #add host to host-set
                           echo "{\"version\":1,\"host_ids\":[${host_id}]}" > add_host_to_host_set.json
                           host_set_id_trim="${host_set_id%\"}"
                           host_set_id_trim="${host_set_id_trim#\"}"
                           curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_to_host_set.json http://boundary-release.default:9200/v1/host-sets/$host_set_id_trim:add-hosts
                           rm -f add_host_to_host_set.json
-
+                          
                           #create target 
                           target_name=$(yq ".target.name" data.yaml)
                           target_description=$(yq ".target.description" data.yaml)
@@ -112,7 +112,7 @@ jobs:
                           echo "{\"attributes\":{\"default_port\":${target_default_port}},\"type\":\"tcp\",\"name\":\"${target_name}\",\"description\":\"${target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"} > target.json
                           target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json http://boundary-release.default:9200/v1/targets | jq '.id' )
                           rm -f target.json
-
+                          
                     fi 
                 done 
 
