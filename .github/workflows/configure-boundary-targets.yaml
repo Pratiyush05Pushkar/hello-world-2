@@ -57,10 +57,11 @@ jobs:
                 echo $host_catalog_id
                 if [ -z "$host_catalog_id" ]; then
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
-                  curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs 
+                  host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs | jq '.id' )
                   rm -f host_catalog.json
                 fi
                 
+                echo Newly created $host_catalog_id
                 #get host-set list which is already present 
 
 
