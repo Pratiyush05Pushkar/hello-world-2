@@ -17,7 +17,7 @@ host-catalog:
                       username: 
                       password: 
                 - name: host_nae_2.1_set
-                  description: descri n_microservice_2 /optional
+                  description: descri n_microervice_2 /optional
                   target:
                       name: 
                       description:
