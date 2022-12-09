@@ -23,7 +23,7 @@ host-catalog:
                       default_port: 3306
                   hosts:
                       name: host_nam_2
-                      description: describ host_name_2 /optional
+                      description: descri host_name_2 /optional
                       address: livspace-dev-mysql8-cluster.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username:
                       password:

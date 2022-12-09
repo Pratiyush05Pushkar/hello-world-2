@@ -108,7 +108,8 @@ jobs:
                           target_name=$(yq ".target.name" data.yaml)
                           target_description=$(yq ".target.description" data.yaml)
                           target_default_port=$(yq ".target.default_port" data.yaml)
-                          echo "{\"attributes\":{\"default_port\":${target_default_port},\"type\":\"tcp\",\"name\":\"${target_name}\",\"description\":\"${target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"} > target.json
+                          echo "{\"attributes\":{\"default_port\":${target_default_port}},\"type\":\"tcp\",\"name\":\"${target_name}\",\"description\":\"${target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
+                          cat target.json
                           target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json http://boundary-release.default:9200/v1/targets | jq '.id' )
 
                           
