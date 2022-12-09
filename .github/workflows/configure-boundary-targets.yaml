@@ -82,7 +82,7 @@ jobs:
                           #create host-set
                           host_set_name=$(yq ".name" data.yaml)
                           host_set_description=$(yq ".description" data.yaml)
-                          echo "{\"host_catalog_id\":\"${}\",\"name\":\"${}\",\"description\":\"${}\"}" > new_host_set.json
+                          echo "{\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_set_name}\",\"description\":\"${host_set_description}\"}" > new_host_set.json
                           host_set_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @new_host_set.json http://boundary-release.default:9200/v1/v1/host-sets | jq '.id' )
                           rm -f new_host_set.json
                     fi 
