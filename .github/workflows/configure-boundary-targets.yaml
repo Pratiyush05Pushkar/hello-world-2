@@ -113,13 +113,6 @@ jobs:
                           target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json http://boundary-release.default:9200/v1/targets | jq '.id' )
                           rm -f target.json
 
-                          #add host-set in target
-                          echo "{\"version\":1,\"host_source_ids\":[${host_set_id}]}" > add_host_set_to_target.json
-                          target_id_trim="${target_id%\"}"
-                          target_id_trim="${target_id_trim#\"}"
-                          curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json http://boundary-release.default:9200/v1/targets/$target_id_trim:add-host-sources
-                          rm -f add_host_set_to_target.json
-
                     fi 
                 done 
 
