@@ -52,8 +52,8 @@ jobs:
                 echo $project_id $host_catalog_name $host_catalog_description
                 echo create host-catalog if not present already
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id > host-catalogs.json
-                echo $(jq .items[].name host-catalogs.json -r)
-                hclist=$(jq .items[].name host-catalogs.json -r)
+                echo $(jq '.items[].name' host-catalogs.json -r) > 
+                hclist=$(jq '.items[].name' host-catalogs.json -r)
                 
                 echo hclist | grep -q $host_catalog_name ; echo $?
                 if [ $(echo hclist | grep -q $host_catalog_name ; echo $?) ] ; then
