@@ -1,21 +1,31 @@
 project: stage
 host-catalog:
-        - name: nms
+        - name: service_1
           description: nms_service_description /optional
           host-sets:
-                - name: nms_microservice_1
+                - name: host_name_1.1_set
                   description: describe nms_microservice_1 /optional
+                  target:
+                    - name: host_name_1.1_target
+                      description:
+                      max_connection: -1
+                      default_port:
                   hosts:
                       - name: host_name_1.1
                         description: describe host_name_1.1 /optional
                         address: IP_address_1.1
-                - name: 
-                      - name: host_name_1.2
-                        description: describe host_name_1.2 /optional
-                        address: IP_address_1.2
-                - name: nms_microservice_2
+                        username: 
+                        password: 
+                - name: host_name_2.1_set
                   description: describe nms_microservice_2 /optional
+                  target:
+                      - name: 
+                        description:
+                        max_connection: -1
+                        default_port:
                   hosts:
                       - name: host_name_2.1
                         description: describe host_name_2 /optional
                         address: IP_address_2
+                        username:
+                        password:

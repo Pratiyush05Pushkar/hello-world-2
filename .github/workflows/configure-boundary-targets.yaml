@@ -1,0 +1,62 @@
+name: Put targets in boundary 
+run-name: Add targets in boundary
+
+on: push
+
+jobs:  
+  build:
+    runs-on: self-hosted
+    name: Put targets in boundary
+    steps:
+      - uses: chrisdickinson/setup-yq@latest
+      - uses: sergeysova/jq-action@v2
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v34
+        with:
+          files: |
+            Vault-secrets/boundary/**
+      # - name: Run step if any file(s) in the Vault-secret folder change
+      #   if: steps.changed-files-specific.outputs.any_changed == 'true'
+      #   run: |
+      #     for file in ${{ steps.changed-files-specific.outputs.all_changed_files }} ; do 
+      #       yq -o=json $file
+      #     done
+      # Prints the changes when done / added - Git Actions does not run when file is removed ******
+      - name: To upload targets 
+        run: |
+            echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
+            curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_sC1BbzThIj:authenticate > response.json
+            token=$(jq -r '.attributes.token' response.json)
+            for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} ;
+            do 
+                #get project id
+                project_name=$(yq r $val "project")
+                project_id=""
+                if [ $project_name == "stage" ]
+                then
+                  project_id="p_Jv4BjggzW9"
+                else
+                  project_id="p_HBZMfr6PcE"
+                fi
+
+                #get host-catalog
+                host_catalog_name="nms" #$(yq r $val "host-catalog.name")
+                host_catalog_description=$(yq r $val "host-catalog.description")
+
+                #create host-catalog if not present already
+                curl --header "Authorization: Bearer ${token}" --request GET http://127.0.0.1:9200/v1/host-catalogs?scope_id=$project_id > host-catalogs.json
+                host-catalogs-list=$(jq .items[].name host-catalogs.json -r)
+                if [ $(echo host-catalogs-list | grep -q $host_catalog_name ; echo $?) ] 
+                  echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
+                  curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs
+                  rm -f host_catalog.json
+                fi
+            done
+            
+        
+          
+
