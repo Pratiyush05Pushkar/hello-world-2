@@ -25,7 +25,7 @@ host-catalog:
                       default_port:
                   hosts:
                       name: host_name_2.1
-                      description: describehost_name_2 /optional
+                      description: describ host_name_2 /optional
                       address: IP_address_2
                       username:
                       password:
