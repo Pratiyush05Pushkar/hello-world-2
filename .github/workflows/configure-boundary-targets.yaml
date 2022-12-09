@@ -100,6 +100,7 @@ jobs:
                           
                           #add host to host-set
                           echo "{\"version\":1,\"host_ids\":[\"${host_id}\"]}" > add_to_host_set.json
+                          cat add_to_host_set.json
                           curl --header "Authorization: Bearer ${token}" --request POST --data @add_to_host_set.json http://boundary-release.default:9200/v1/host-sets/$host_set_id:add-hosts
                           
 
