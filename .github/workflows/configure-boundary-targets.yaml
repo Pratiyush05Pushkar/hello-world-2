@@ -88,6 +88,21 @@ jobs:
                           host_set_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @new_host_set.json http://boundary-release.default:9200/v1/host-sets | jq '.id' )
                           echo Host_Set created with id = $host_set_id
                           rm -f new_host_set.json
+
+                          #create host
+                          host_name=$(yq ".hosts.name" data.yaml)
+                          host_description=$(yq ".hosts.description" data.yaml)
+                          host_ip=$(yq ".hosts.address" data.yaml)
+                          host_username=$(yq ".hosts.username" data.yaml)
+                          host_password=$(yq ".hosts.password" data.yaml)
+                          echo "{\"attributes\":{\"address\":\"${host_ip}\"},\"type\":\"static\",\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_name}\",\"description\":\"${host_description}\"}" > host.json
+                          host_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host.json http://boundary-release.default:9200/v1/hosts | jq '.id' )
+                          
+                          #add host to host-set
+                          echo "{\"version\":1,\"host_ids\":[\"${host_id}\"]}" > add_to_host_set.json
+                          curl --header "Authorization: Bearer ${token}" --request POST --data @add_to_host_set.json http://boundary-release.default:9200/v1/host-sets/$host_set_id:add-hosts
+                          
+
                     fi 
                 done 
 

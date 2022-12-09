@@ -3,7 +3,7 @@ host-catalog:
           name: service_234
           description: nms_servicederpton/optio
           host-sets:
-                - name: host_name_1.1_set
+                - name: host_name_1.2_set
                   description: descri nms_icroservie_1 /optional
                   target:
                       name: host_na1me_1.1_target
@@ -11,12 +11,12 @@ host-catalog:
                       max_connection: -1
                       default_port: 
                   hosts:
-                      name: host_name_1.1
+                      name: host_name_1.2
                       description: descib host_ame_1.1 /optional
-                      address: IP_adress_1.1
+                      address: livspace-staging-mysql5.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username: 
                       password: 
-                - name: host_nae_2.1_set
+                - name: host_nae_2.2_set
                   description: descri n_microervice_2 /optional
                   target:
                       name: 
@@ -24,8 +24,8 @@ host-catalog:
                       max_connection: -1
                       default_port:
                   hosts:
-                      name: host_name_2.1
+                      name: host_name_2.2
                       description: describ host_name_2 /optional
-                      address: IP_addess_2
+                      address: livspace-dev-mysql8-cluster.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username:
                       password:
