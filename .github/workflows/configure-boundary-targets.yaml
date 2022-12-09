@@ -76,8 +76,9 @@ jobs:
                     if [ ! $(echo $old_host_set_list | grep -q diff_hs ; echo $? ) ] ;then
                           echo Needs to be deleted 
                     else
+                          echo New
                           $(hs=$diff_hs yq '.host-catalog.host-sets[] | select(.name==env(hs))' $val) > data.yaml
-                          echo $(yq '.target.name' data.yaml)
+                          cat data.yaml
                     fi 
                 done 
 
