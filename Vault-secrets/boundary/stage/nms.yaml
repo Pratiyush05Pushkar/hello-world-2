@@ -12,7 +12,7 @@ host-catalog:
                       default_port: 
                   hosts:
                       name: host_name_1.1
-                      description: describe host_name_1.1 /optional
+                      description: describe host_ame_1.1 /optional
                       address: IP_address_1.1
                       username: 
                       password: 

@@ -73,7 +73,7 @@ jobs:
                 diff_host_set=$(echo $old_host_set_list $new_host_set_list | sort | uniq -u )
                 for diff_hs in $diff_host_set;
                 do
-                    if [ $(echo $old_host_set_list | grep -q diff_hs ; echo $? ) ] ;then
+                    if [ ! $(echo $old_host_set_list | grep -q diff_hs ; echo $? ) ] ;then
                           echo Needs to be deleted 
                     else
                           echo New
