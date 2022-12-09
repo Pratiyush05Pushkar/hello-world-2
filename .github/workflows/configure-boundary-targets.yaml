@@ -51,7 +51,7 @@ jobs:
                 
                 echo $project_id $host_catalog_name $host_catalog_description
                 echo create host-catalog if not present already
-                curl --header "Authorization: Bearer ${token}" --request GET http://127.0.0.1:9200/v1/host-catalogs?scope_id=p_Jv4BjggzW9
+                curl --header "Authorization: Bearer ${token}" --request GET 'http://127.0.0.1:9200/v1/host-catalogs?scope_id=$project_id'
                 echo reached here
                 host-catalogs-list=$(jq .items[].name host-catalogs.json -r)
                 if [ $(echo host-catalogs-list | grep -q $host_catalog_name ; echo $?) ] ; then
