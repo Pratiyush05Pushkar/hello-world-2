@@ -16,7 +16,7 @@ host-catalog:
                       address: IP_address_1.1
                       username: 
                       password: 
-                - name: host_name_2.1_set
+                - name: host_nae_2.1_set
                   description: describe ns_microservice_2 /optional
                   target:
                       name: 
