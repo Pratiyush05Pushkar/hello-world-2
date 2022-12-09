@@ -37,6 +37,7 @@ jobs:
                 echo $val
                 #get project id
                 project_name=$(yq ".project" $val)
+                new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
                 project_id=""
                 if [ $project_name == "stage" ]
                 then
@@ -66,8 +67,9 @@ jobs:
                 old_host_set_list=$(jq -r '. | select(.item) | .items[].name' all_host_set.json)
 
                 #host-sets in yaml file 
-                new_host_set_list=$(yq '.host-catalog.host-sets[].name' $val)
+                new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
 
+                echo $host_catalog_id $project_id
                 cat old_host_set_list new_host_set_list | sort | uniq -u 
 
 
