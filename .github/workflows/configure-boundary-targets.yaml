@@ -28,7 +28,6 @@ jobs:
       # Prints the changes when done / added - Git Actions does not run when file is removed ******
       - name: To upload targets 
         run: |
-            yq --help
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
             curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_sC1BbzThIj:authenticate > response.json
             token=$(jq -r '.attributes.token' response.json)
@@ -37,7 +36,7 @@ jobs:
             do 
                 echo $val
                 #get project id
-                project_name=$(yq r $val "project")
+                project_name=$(yq ".project" $val)
                 project_id=""
                 if [ $project_name == "stage" ]
                 then
@@ -47,8 +46,8 @@ jobs:
                 fi
 
                 #read host-catalog from yaml file 
-                host_catalog_name=$(yq r $val "host-catalog.name")
-                host_catalog_description=$(yq r $val "host-catalog.description")
+                host_catalog_name=$(yq ".host-catalog.name" $val)
+                host_catalog_description=$(yq ".host-catalog.description" $val)
                 
                 
                 #get host-catalog list
@@ -67,7 +66,7 @@ jobs:
                 old_host_set_list=$(jq -r '. | select(.item) | .items[].name' all_host_set.json)
 
                 #host-sets in yaml file 
-                new_host_set_list=$(yq r $val "host-catalog.host-sets[].name")
+                new_host_set_list=$(yq '.host-catalog.host-sets[].name' $val)
 
                 cat old_host_set_list new_host_set_list | sort | uniq -u 
 
