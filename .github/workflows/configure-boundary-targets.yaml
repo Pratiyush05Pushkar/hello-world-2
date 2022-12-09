@@ -66,6 +66,7 @@ jobs:
                 old_host_set_list=""
                 if [ -s all_host_set.json ] ;
                 then
+                else
                     old_host_set_list=$(jq -r '.items[].name' all_host_set.json)
                 fi
 
