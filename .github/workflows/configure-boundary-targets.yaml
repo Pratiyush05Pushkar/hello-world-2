@@ -53,7 +53,8 @@ jobs:
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
                 host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
                 
-                if [ -z "$host_catalog_id" ]; then
+                if [ -z "$host_catalog_id" ]
+                then
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
                   host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs | jq '.id' )
                   rm -f host_catalog.json
@@ -76,7 +77,8 @@ jobs:
                 do
                     echo diff_val $diff_hs
                     echo $old_host_set_list | grep -q $diff_hs ; echo $? 
-                    if [ ! $(echo $old_host_set_list | grep -q $diff_hs ; echo $? ) ] ;then
+                    if [ ! $(echo $old_host_set_list | grep -q $diff_hs ; echo $? ) ] 
+                    then
                           #deleted host-sets in recent git push
                           echo Needs to be deleted 
                     else
