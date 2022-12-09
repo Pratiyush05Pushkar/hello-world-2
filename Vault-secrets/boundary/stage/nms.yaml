@@ -1,7 +1,7 @@
 project: stage
 host-catalog:
           name: service_234
-          description: nms_service_description /option
+          description: nms_service_description /optio
           host-sets:
                 - name: host_name_1.1_set
                   description: describe nms_microservice_1 /optional
