@@ -78,6 +78,7 @@ jobs:
                           #deleted host-sets in recent git push
                           echo Needs to be deleted 
                     else
+                          echo $diff_hs
                           #newly created host-sets in recent git push
                           hs=$diff_hs yq '.host-catalog.host-sets[] | select(.name==env(hs))' $val > data.yaml
                           
