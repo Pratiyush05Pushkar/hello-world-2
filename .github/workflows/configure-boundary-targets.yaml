@@ -37,7 +37,7 @@ jobs:
                 #get project id
                 project_name=$(yq ".project" $val)
                 project_id=""
-                if [ $project_name == "stage" ]
+                if [ $project_name == "stage" ] ;
                 then
                   project_id="p_Jv4BjggzW9"
                 else
@@ -53,9 +53,9 @@ jobs:
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
                 host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
                 
-                if [ -z "$host_catalog_id" ]
+                if [ -z "$host_catalog_id" ] ;
                 then
-                  echo $host_catalog_id
+                  echo HOst_catalog_id $host_catalog_id
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
                   host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs | jq '.id' )
                   rm -f host_catalog.json
@@ -77,14 +77,8 @@ jobs:
                 for diff_hs in $diff_host_set
                 do
                     echo diff_val_start $diff_hs
+                    
                     if [[ " ${old_host_set_list[*]} " =~ " ${diff_hs} " ]]; then
-                        echo Present
-                    else
-                        echo NoT
-                    fi
-                    echo ${old_host_set_list[@]} | grep -q $diff_hs 
-                    if [ ! $(echo $old_host_set_list | grep -q $diff_hs ; echo $? ) ] 
-                    then
                       #deleted host-sets in recent git push
                       echo Needs to be deleted 
                     else
