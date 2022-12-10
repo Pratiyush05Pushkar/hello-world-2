@@ -4,7 +4,7 @@ host-catalog:
           description: nms_servicederpton/optio
           host-sets:
                 - name: nms_backend_set
-                  description: dns_croservie_1 /optional
+                  description: dns_croserve_1 /optional
                   target:
                       name: nms_backend_target
                       description: deded
