@@ -77,7 +77,11 @@ jobs:
                 for diff_hs in $diff_host_set
                 do
                     echo diff_val_start $diff_hs
-                    echo ${old_host_set_list[@]} | grep -q $diff_hs ; echo $?
+                    if [[ " ${old_host_set_list[*]} " =~ " ${diff_hs} " ]]; then
+                        echo whatever you want to do when array contains value
+                    else
+                        echo not present 
+                    fi
                     
                 done 
 
