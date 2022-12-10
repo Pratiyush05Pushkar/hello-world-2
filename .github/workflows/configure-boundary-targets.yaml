@@ -78,7 +78,7 @@ jobs:
                 for diff_hs in $diff_host_set
                 do
                     echo diff_val_start $diff_hs
-                    if [ $( echo $old_host_set_list | grep $diff_hs ) ]; then
+                    if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
                         echo whatever you want to do when array contains value
                     else
                         echo not present 
