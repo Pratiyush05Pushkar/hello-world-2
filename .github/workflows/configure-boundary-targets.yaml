@@ -77,7 +77,7 @@ jobs:
                 for diff_hs in $diff_host_set
                 do
                     echo diff_val_start $diff_hs
-                    grep -q $diff_hs ${old_host_set_list[@]}
+                    echo ${old_host_set_list[@]} | grep -q $diff_hs 
                     if [ ! $(echo $old_host_set_list | grep -q $diff_hs ; echo $? ) ] 
                     then
                       #deleted host-sets in recent git push
