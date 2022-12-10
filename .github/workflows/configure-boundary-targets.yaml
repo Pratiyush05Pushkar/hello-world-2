@@ -77,7 +77,7 @@ jobs:
                 for diff_hs in $diff_host_set
                 do
                     echo diff_val_start $diff_hs
-                    
+                    echo $([ " ${old_host_set_list[*]} " =~ " ${diff_hs} " ])
                     if [[ " ${old_host_set_list[*]} " =~ " ${diff_hs} " ]]; then
                       #deleted host-sets in recent git push
                       echo Needs to be deleted 
