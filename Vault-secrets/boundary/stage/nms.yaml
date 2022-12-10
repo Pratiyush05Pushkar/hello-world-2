@@ -1,6 +1,6 @@
 project: stage
 host-catalog:
-          name: service_55
+          name: service_234
           description: nms_servicederpton/optio
           host-sets:
                 - name: host_1_sett
