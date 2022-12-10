@@ -32,7 +32,7 @@ jobs:
             curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_sC1BbzThIj:authenticate > response.json
             token=$(jq -r '.attributes.token' response.json)
             echo $token
-            for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} ;
+            for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} 
             do 
                 #get project id
                 project_name=$(yq ".project" $val)
@@ -55,6 +55,7 @@ jobs:
                 
                 if [ -z "$host_catalog_id" ]
                 then
+                  echo $host_catalog_id
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
                   host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs | jq '.id' )
                   rm -f host_catalog.json
@@ -73,7 +74,7 @@ jobs:
                 echo OLD_list $old_host_set_list 
                 echo New list $new_host_set_list 
                 echo diff $diff_host_set
-                for diff_hs in $diff_host_set;
+                for diff_hs in $diff_host_set
                 do
                     echo diff_val $diff_hs
                     echo $old_host_set_list | grep -q $diff_hs ; echo $? 
