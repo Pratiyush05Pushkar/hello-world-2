@@ -62,31 +62,90 @@ jobs:
                   rm -f host_catalog.json
                 fi
                 
-                #get host-sets which are already present 
-                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_set.json
-                old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_set.json)
+                #get host-sets , hosts and targets which are already present 
+                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
+                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
+                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/targets?scope_id=$project_id > all_targets.json
 
-                #host-sets in yaml file 
+                #host-sets already present in Boudary
+                old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
+                
+                #host-sets in recent yaml file 
                 new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
 
                 #diff gets us deleted host-sets and newly created host-sets 
                 diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
                 
-                echo OLD_list ${old_host_set_list[@]} 
-                echo New list $new_host_set_list 
-                echo diff $diff_host_set
                 for diff_hs in $diff_host_set
                 do
-                    echo diff_val_start $diff_hs
                     if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
                         #deleted host-set in recent git-push
+
                         host_set_name=$diff_hs
                         host_name=$( echo "${diff_hs%_set}" )
                         target_name="$( echo $host_name )_target"
 
                         echo To delete $host_set_name $host_name $target_name
+
+                        #delete host
+                        host_id_to_del=$(jq -r --arg h_name $host_name '.items[] | select(.name==$h_name) | .id' all_hosts.json)
+                        host_id_to_del_trim="${host_id_to_del%\"}"
+                        host_id_to_del_trim="${host_id_to_del_trim#\"}"
+                        curl --header "Authorization: Bearer ${token}" --request DELETE http://boundary-release.default:9200/v1/hosts/$host_id_to_del_trim
+
+                        #delete host-set
+                        host_set_id_to_del=$(jq -r --arg hst_name $host_set_name '.items[] | select(.name==$hst_name) | .id' all_host_sets.json)
+                        host_set_id_to_del_trim="${host_set_id_to_del%\"}"
+                        host_set_id_to_del_trim="${host_set_id_to_del_trim#\"}"
+                        curl --header "Authorization: Bearer ${token}" --request DELETE http://boundary-release.default:9200/v1/host-sets/$host_set_id_to_del_trim
+
+                        #delete target 
+                        target_id_to_del=$(jq -r --arg t_name $target_name '.items[] | select(.name==$t_name) | .id' all_targets.json)
+                        target_id_to_del_trim="${target_id_to_del%\"}"
+                        target_id_to_del_trim="${target_id_to_del_trim#\"}"
+                        curl --header "Authorization: Bearer ${token}" --request DELETE http://boundary-release.default:9200/v1/targets/$target_id_to_del_trim
+
                     else
-                        echo Needs to be created 
+                        #newly created host-set in recent git-push 
+                        #extract host-set config from yaml file 
+                        hs=$diff_hs yq '.host-catalog.host-sets[] | select(.name==env(hs))' $val > data.yaml
+
+                        #create host-set
+                        host_set_name=$(yq ".name" data.yaml)
+                        host_set_description=$(yq ".description" data.yaml)
+                        echo "{\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_set_name}\",\"description\":\"${host_set_description}\"}" > new_host_set.json
+                        host_set_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @new_host_set.json http://boundary-release.default:9200/v1/host-sets | jq '.id' )
+
+                        #create host
+                        host_name=$(yq ".hosts.name" data.yaml)
+                        host_description=$(yq ".hosts.description" data.yaml)
+                        host_ip=$(yq ".hosts.address" data.yaml)
+                        host_username=$(yq ".hosts.username" data.yaml)
+                        host_password=$(yq ".hosts.password" data.yaml)
+                        echo "{\"attributes\":{\"address\":\"${host_ip}\"},\"type\":\"static\",\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_name}\",\"description\":\"${host_description}\"}" > host.json
+                        host_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host.json http://boundary-release.default:9200/v1/hosts | jq '.id' )
+
+
+                        #add host to host-set
+                        echo "{\"version\":1,\"host_ids\":[${host_id}]}" > add_host_to_host_set.json
+                        host_set_id_trim="${host_set_id%\"}"
+                        host_set_id_trim="${host_set_id_trim#\"}"
+                        curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_to_host_set.json http://boundary-release.default:9200/v1/host-sets/$host_set_id_trim:add-hosts
+
+                        #create target 
+                        target_name=$(yq ".target.name" data.yaml)
+                        target_description=$(yq ".target.description" data.yaml)
+                        target_default_port=$(yq ".target.default_port" data.yaml)
+                        echo "{\"attributes\":{\"default_port\":${target_default_port}},\"type\":\"tcp\",\"name\":\"${target_name}\",\"description\":\"${target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
+                        cat target.json
+                        target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json http://boundary-release.default:9200/v1/targets | jq '.id' )
+
+                        #add host-set in target
+                        echo "{\"version\":1,\"host_source_ids\":[${host_set_id}]}" > add_host_set_to_target.json
+                        target_id_trim="${target_id%\"}"
+                        target_id_trim="${target_id_trim#\"}"
+                        curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json http://boundary-release.default:9200/v1/targets/$target_id_trim:add-host-sources
+                        rm -f add_host_set_to_target.json
                     
                     fi
                     
