@@ -4,7 +4,7 @@ host-catalog:
           description: nms_servicederpton/optio
           host-sets:
                 - name: host__1_set
-                  description: descri ns_icroservie_1 /optional
+                  description: descr ns_icroservie_1 /optional
                   target:
                       name: host__1_target
                       description: deded
