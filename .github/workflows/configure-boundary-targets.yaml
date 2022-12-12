@@ -170,8 +170,9 @@ jobs:
                         curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_boundary_policy.json http://vault.default:8200/v1/sys/policy/$db_policy
 
                         #Generate vault token
-                        echo "{ \"policies\": [\"${db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"20m\",\"renewable\": true }" > vault_db_token_payload.json
-                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_db_token_payload.json http://vault.default:8200/v1/auth/token/create
+                        echo "{ \"policies\": [\"${db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"22m\",\"renewable\": true }" > vault_db_token_payload.json
+                        boundary_token=$(curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_db_token_payload.json http://vault.default:8200/v1/auth/token/create | jq '.auth.client_token' 
+                        echo Token to put in boundary $boundary_token
                     
                     fi
                     
