@@ -148,10 +148,10 @@ jobs:
                         rm -f add_host_set_to_target.json
                         
                         echo Target_default_port is $target_default_port
-                        if [ target_default_port == 3306 ] 
+                        if [ $target_default_port == 3306 ] 
                         then
                               echo Mysql
-                        elif [ target_default_port == 5432 ] 
+                        elif [ $target_default_port == 5432 ] 
                         then
                               echo Postgres
                         fi
