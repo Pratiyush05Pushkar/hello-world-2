@@ -3,14 +3,14 @@ host-catalog:
           name: service_234
           description: nms_servicederpton/optio
           host-sets:
-                - name: nms_backend_156_set
+                - name: nms_backend_1536_set
                   description: dns_crosere_1 /optional
                   target:
-                      name: nms_backend_156_target
-                      description: dededfsdfds
+                      name: nms_backend_1536_target
+                      description: dededfsdfd
                       default_port: 3306
                   hosts:
-                      name: nms_backend_156
+                      name: nms_backend_1536
                       description: de s_e_1.1 /optional
                       address: livspace-staging-mysql5.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username: livspace
