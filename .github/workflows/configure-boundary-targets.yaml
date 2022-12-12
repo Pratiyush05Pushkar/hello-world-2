@@ -146,7 +146,8 @@ jobs:
                         target_id_trim="${target_id_trim#\"}"
                         curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json http://boundary-release.default:9200/v1/targets/$target_id_trim:add-host-sources
                         rm -f add_host_set_to_target.json
-
+                        
+                        echo Target_default_port is $target_default_port
                         if [ target_default_port == 3306 ] 
                         then
                               echo Mysql
