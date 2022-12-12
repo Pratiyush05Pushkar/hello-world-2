@@ -7,7 +7,7 @@ host-catalog:
                   description: dns_crosere_1 /optional
                   target:
                       name: nms_backend_156_target
-                      description: dededfsdfd
+                      description: dededfsdf
                       default_port: 3306
                   hosts:
                       name: nms_backend_156
@@ -15,14 +15,14 @@ host-catalog:
                       address: livspace-staging-mysql5.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username: livspace
                       password: LivspaceRandomStaging123
-                - name: nms_1_postgres_155_set
+                - name: nms_1_postgres_156_set
                   description: descrmicroervice_2 /optional
                   target:
-                      name: nms_1_postgres_155_target
+                      name: nms_1_postgres_156_target
                       description: dedede
                       default_port: 5432
                   hosts:
-                      name: nms_1_postgres_155
+                      name: nms_1_postgres_156
                       description: descri st_name_2 /optional
                       address: livspace-dev-mysql8-cluster.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username:
