@@ -170,7 +170,7 @@ jobs:
                         curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_boundary_policy.json http://vault.default:8200/v1/sys/policy/$db_policy
 
                         #Generate vault token
-                        echo "{ \"policies\": [\"${db_policy}\"],\"no-default-policy\": true,\"orphan\": true,\"period\": \"20m\",\"renewable\": true }" > vault_db_token_payload.json
+                        echo "{ \"policies\": [\"${db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"20m\",\"renewable\": true }" > vault_db_token_payload.json
                         curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_db_token_payload.json http://vault.default:8200/v1/auth/token/create
                     
                     fi
