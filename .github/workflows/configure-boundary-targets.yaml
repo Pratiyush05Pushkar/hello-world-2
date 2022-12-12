@@ -184,13 +184,10 @@ jobs:
                         #create credential library
                         credential_library_name="$( echo $host_name )_cred_lib"
                         echo "{\"type\":\"vault\",\"credential_store_id\":${credential_store_id},\"name\":\"${credential_library_name}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_create_role}\"}}" > cred_lib_info.json
-                        echo Credential_library payload
-                        cat cred_lib_info.json
-                        curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json http://boundary-release.default:9200/v1/credential-libraries > response_cred_lib.json
-                        echo response of cred_lib
-                        cat response_cred_lib.json
-                        cred_lib_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json http://boundary-release.default:9200/v1/credential-libraries | jq '.id' )
                         
+                        cred_lib_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json http://boundary-release.default:9200/v1/credential-libraries | jq '.id' )
+                        echo Credential_lib created $cred_lib_id
+
                         #add credential library to target
                         echo "{\"version\":2,\"application_credential_source_ids\":[${cred_lib_id}]}" > add_cred_lib_to_target.json
                         curl --header "Authorization: Bearer ${token}" --request POST --data @add_cred_lib_to_target.json http://boundary-release.default:9200/v1/targets/$target_id_trim:add-credential-sources
