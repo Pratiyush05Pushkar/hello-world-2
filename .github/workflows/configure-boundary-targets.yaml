@@ -147,16 +147,7 @@ jobs:
                         curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json http://boundary-release.default:9200/v1/targets/$target_id_trim:add-host-sources
                         rm -f add_host_set_to_target.json
                         
-                        if [ $target_default_port == 3306 ] 
-                        then
-                           #curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @db_role_payload.json http://vault.default:8200/v1/database/roles/$db_credential_create_role
-                          echo It is Mysql
-                        elif [ $target_default_port == 5432 ] 
-                        then
-                            #create vault database connection
-
-                            
-                        fi
+                        
 
                         #create vault policy for boundary to access role
 
