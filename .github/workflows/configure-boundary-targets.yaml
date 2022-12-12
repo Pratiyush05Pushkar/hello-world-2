@@ -174,7 +174,11 @@ jobs:
                         boundary_token=$(curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_db_token_payload.json http://vault.default:8200/v1/auth/token/create | jq '.auth.client_token' )
                         echo Token to put in boundary $boundary_token
 
-                        
+                        #Create credential store in boundary
+                        credential_store_name="$( echo $host_name )_cred_store"
+                        echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"http://vault.default:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":\"${boundary_token}\",\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_id}\"}" > credential_store_payload.json
+                        credential_store_id=$(curl --header "Authorization: Bearer ${token}" --request POST http://boundary-release.default:9200/v1/credential-stores | jq '.id' )
+                        echo Credential store $credential_store_id
                     fi
                     
                 done 
