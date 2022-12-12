@@ -147,14 +147,14 @@ jobs:
                         curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json http://boundary-release.default:9200/v1/targets/$target_id_trim:add-host-sources
                         rm -f add_host_set_to_target.json
                         
+                        db_connection_name="$( echo $host_name )_db"
+                        db_credential_create_role="$( echo $host_name )_role"
                         if [ $target_default_port == 3306 ] ;then
-
-                          db_connection_name="$( echo $host_name )_db"
+                          
                           echo "{\"backend\":\"database\",\"name\":\"${db_connection_name}\",\"plugin_name\":\"mysql-database-plugin\",\"verify_connection\":true,\"connection_url\":\"{{username}}:{{password}}@tcp(${host_ip}:3306)\/\",\"username\":\"${host_username}\",\"password\":\"${host_password}\",\"max_open_connections\":4,\"max_idle_connections\":0,\"max_connection_lifetime\":\"0s\"}" > db_connection_payload.json
                           curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @db_connection_payload.json http://vault.default:8200/v1/database/config/$db_connection_name
 
                           #creat vault role for database-user creation
-                          db_credential_create_role="$( echo $host_name )_role"
                           echo "{\"backend\":\"database\",\"name\":\"${db_credential_create_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
                           curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @db_role_payload.json http://vault.default:8200/v1/database/roles/$db_credential_create_role
                         
@@ -163,9 +163,13 @@ jobs:
                         fi
 
                         #create vault policy for boundary to access role
-
+                        db_policy="$( echo $host_name )_db_policy"
+                        echo "{\"name\":\"${db_policy}\",\"policy\":\\\"path \\\"database/creds/${db_credential_create_role}\\\" {\\\n  capabilities = [\\\"read\\\"]\\\n}\\\n\\\npath \\\"auth/token/lookup-self\\\" {\\\n  capabilities = [\\\"read\\\"]\\\n}\\\n\\\npath \\\"auth/token/renew-self\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\n\\\npath \\\"auth/token/revoke-self\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\n\\\npath \\\"sys/leases/renew\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\n\\\npath \\\"sys/leases/revoke\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\n\\\npath \\\"sys/capabilities-self\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\"}" > vault_boundary_policy.json
+                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request PUT --data @vault_boundary_policy.json http://127.0.0.1:8200/v1/sys/policies/acl/$db_policy
 
                         #create vault token 
+                        echo "{ \"policies\": [\"${db_policy}\"], \"period\": \"20m\", \"orphan\": true ,\"no-default-policy\": true, \"renewable\": true }" > vault_token_create_payload.json
+                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_token_create_payload.json http://127.0.0.1:8200/v1/auth/token/create 
 
                     
                     fi
