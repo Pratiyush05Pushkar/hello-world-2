@@ -7,7 +7,7 @@ host-catalog:
                   description: dns_crosere_1 /optional
                   target:
                       name: nms_backend_1.2_target
-                      description: deded
+                      description: dededfsdfds
                       default_port: 3306
                   hosts:
                       name: nms_backend_1.2
