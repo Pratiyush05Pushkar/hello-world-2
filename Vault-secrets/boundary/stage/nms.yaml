@@ -15,12 +15,12 @@ host-catalog:
                       address: livspace-staging-mysql5.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username: 
                       password: 
-                - name: nms_1_set
+                - name: nms_1_postgres_set
                   description: descrmicroervice_2 /optional
                   target:
-                      name: nms_1_target
+                      name: nms_1_postgres_target
                       description: dedede
-                      default_port: 3306
+                      default_port: 5432
                   hosts:
                       name: nms_1
                       description: descri st_name_2 /optional
