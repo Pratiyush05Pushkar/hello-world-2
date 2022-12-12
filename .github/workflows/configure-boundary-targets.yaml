@@ -177,15 +177,18 @@ jobs:
                         #Create credential store in boundary
                         credential_store_name="$( echo $host_name )_cred_store"
                         echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"http://vault.default:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_id}\"}" > credential_store_payload.json
-                        echo Credntial store payload -
-                        cat credential_store_payload.json
-                        curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json http://boundary-release.default:9200/v1/credential-stores > response_cred_store.json
-                        cat response_cred_store.json
-                        credential_store_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json http://boundary-release.default:9200/v1/credential-stores | jq '.id' )
                         
+                        credential_store_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json http://boundary-release.default:9200/v1/credential-stores | jq '.id' )
+                        echo Credential_store_id created is $credential_store_id
+
                         #create credential library
                         credential_library_name="$( echo $host_name )_cred_lib"
                         echo "{\"type\":\"vault\",\"credential_store_id\":${credential_store_id},\"name\":\"${credential_library_name}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_create_role}\"}}" > cred_lib_info.json
+                        echo Credential_library payload
+                        cat cred_lib_info.json
+                        curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json http://boundary-release.default:9200/v1/credential-libraries > response_cred_lib.json
+                        echo response of cred_lib
+                        cat response_cred_lib.json
                         cred_lib_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json http://boundary-release.default:9200/v1/credential-libraries | jq '.id' )
                         
                         #add credential library to target
