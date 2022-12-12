@@ -185,7 +185,7 @@ jobs:
                         cred_lib_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json http://boundary-release.default:9200/v1/credential-libraries | jq '.id' )
                         
                         #add credential library to target
-                        echo "{\"version\":1,\"application_credential_source_ids\":[${cred_lib_id}]}" > add_cred_lib_to_target.json
+                        echo "{\"version\":2,\"application_credential_source_ids\":[${cred_lib_id}]}" > add_cred_lib_to_target.json
                         curl --header "Authorization: Bearer ${token}" --request POST --data @add_cred_lib_to_target.json http://boundary-release.default:9200/v1/targets/$target_id_trim:add-credential-sources
                     fi
                     
