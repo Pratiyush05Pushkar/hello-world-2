@@ -166,7 +166,7 @@ jobs:
                         db_policy="$( echo $host_name )_db_policy"
 
                         echo Creating ROle 
-                        echo "{\"name\":\"${db_policy}\",\"policy\":\\\"path \\\"database/creds/${db_credential_create_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\\\"}" > vault_boundary_policy.json
+                        echo "{\"name\":\"${db_policy}\",\"policy\":\"path \\\"database/creds/${db_credential_create_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\"}" > vault_boundary_policy.json
                         echo role created 
                         cat vault_boundary_policy.json
                         curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_boundary_policy.json http://vault.default:8200/v1/sys/policy/$db_policy
