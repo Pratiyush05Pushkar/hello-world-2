@@ -162,6 +162,11 @@ jobs:
                             echo Postgres
                         fi
 
+                        #policy for boundary to access db_connection_role 
+                        db_policy="$( echo $host_name )_db_policy"
+                        echo "{\"name\":\"${db_policy}\",\"policy\":\\\"path \\\"database/creds/${db_credential_create_role}\\\" {\\\n  capabilities = [\\\"read\\\"]\\\n}\\\n\\\npath \\\"auth/token/lookup-self\\\" {\\\n  capabilities = [\\\"read\\\"]\\\n}\\\n\\\npath \\\"auth/token/renew-self\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\n\\\npath \\\"auth/token/revoke-self\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\n\\\npath \\\"sys/leases/renew\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\n\\\npath \\\"sys/leases/revoke\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\n\\\npath \\\"sys/capabilities-self\\\" {\\\n  capabilities = [\\\"update\\\"]\\\n}\\\"}" > vault_boundary_policy.json
+                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request PUT --data @vault_boundary_policy.json http://127.0.0.1:8200/v1/sys/policies/acl/$db_policy
+
 
                     
                     fi
