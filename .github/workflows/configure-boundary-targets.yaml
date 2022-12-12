@@ -182,8 +182,9 @@ jobs:
                         #create credential library
                         credential_library_name="$( echo $host_name )_cred_lib"
                         echo "{\"type\":\"vault\",\"credential_store_id\":\"${credential_store_id}\",\"name\":\"${credential_library_name}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_create_role}\"}}" > cred_lib_info.json
-                        credential_library_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json http://boundary-release.default:9200/v1/credential-libraries | jq '.id' )
-                        echo Credential library id $credential_library_id
+                        cat cred_lib_info.json
+                        curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json http://boundary-release.default:9200/v1/credential-libraries > response_info.json
+                        cat response_info.json
                     fi
                     
                 done 
