@@ -159,7 +159,7 @@ jobs:
                           curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @db_role_payload.json http://vault.default:8200/v1/database/roles/$db_credential_create_role
 
                           #add role in DB connection
-                          echo "{\"allowed_roles\":[\"${db_credential_create_role}\"]}" > allowd_role_payload.json
+                          echo "{\"allowed_roles\":[\"${db_credential_create_role}\"]}" > allowed_role_payload.json
                           curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @allowed_role_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
                         
                         elif [ $target_default_port == 5432 ] ;then
