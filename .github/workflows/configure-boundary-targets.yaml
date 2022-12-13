@@ -115,15 +115,15 @@ jobs:
 
                         #delete db_role from vault
                         db_role_name=$( echo $host_name )_role
-                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request DELETE http://vault.default:8200/v1/database/roles/${db_role_name}
+                        curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request DELETE http://vault.default:8200/v1/database/roles/${db_role_name}
 
                         #delete db_connection from vault
                         db_connection_name=$( echo $host_name )_db
-                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request DELETE http://vault.default:8200/v1/database/config/${db_connection_name}
+                        curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request DELETE http://vault.default:8200/v1/database/config/${db_connection_name}
 
                         #delete boundary access policy from vault
                         db_policy_name=$( echo $host_name )_db_policy
-                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request DELETE http://vault.default:8200/v1/sys/policies/acl/${db_policy_name}
+                        curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request DELETE http://vault.default:8200/v1/sys/policies/acl/${db_policy_name}
                       
                     else
                         #newly created host-set in recent git-push 
@@ -173,30 +173,30 @@ jobs:
                         if [ $target_default_port == 3306 ] ;then
                           
                           echo "{\"backend\":\"database\",\"name\":\"${db_connection_name}\",\"plugin_name\":\"mysql-database-plugin\",\"verify_connection\":true,\"connection_url\":\"{{username}}:{{password}}@tcp(${host_ip}:3306)\/\",\"username\":\"${host_username}\",\"password\":\"${host_password}\",\"max_open_connections\":4,\"max_idle_connections\":0,\"max_connection_lifetime\":\"0s\"}" > db_connection_payload.json
-                          curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @db_connection_payload.json http://vault.default:8200/v1/database/config/$db_connection_name
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_connection_payload.json http://vault.default:8200/v1/database/config/$db_connection_name
 
                           #creat vault role for database-user creation
                           echo "{\"backend\":\"database\",\"name\":\"${db_credential_create_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
-                          curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @db_role_payload.json http://vault.default:8200/v1/database/roles/$db_credential_create_role
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_role_payload.json http://vault.default:8200/v1/database/roles/$db_credential_create_role
 
                           #add role in DB connection
                           echo "{\"allowed_roles\":[\"${db_credential_create_role}\"]}" > allowed_role_payload.json
-                          curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @allowed_role_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @allowed_role_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
                         
                         elif [ $target_default_port == 5432 ] ;then
                           
                           echo Postgres db connection 
                           database_name=$(yq ".hosts.database_name" data.yaml)
                           echo "{\"backend\":\"database\",\"name\":\"${db_connection_name}\",\"plugin_name\":\"postgresql-database-plugin\",\"verify_connection\":true,\"connection_url\":\"postgresql://{{username}}:{{password}}@${host_ip}:5432/${database_name}\",\"username\":\"${host_username}\",\"password\":\"${host_password}\",\"max_open_connections\":4,\"max_idle_connections\":0,\"max_connection_lifetime\":\"0s\"}" > db_connection_payload.json
-                          curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @db_connection_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_connection_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
                           
                           #creat vault role for database-user creation
                           echo "{\"backend\":\"database\",\"name\":\"${db_credential_create_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE ROLE \\\"{{name}}\\\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT SELECT ON ALL TABLES IN SCHEMA public TO \\\"{{name}}\\\";\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
-                          curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @db_role_payload.json http://vault.default:8200/v1/database/roles/$db_credential_create_role
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_role_payload.json http://vault.default:8200/v1/database/roles/$db_credential_create_role
 
                           #add role in DB connection
                           echo "{\"allowed_roles\":[\"${db_credential_create_role}\"]}" > allowed_role_payload.json
-                          curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @allowed_role_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @allowed_role_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
                           
                         fi
 
@@ -205,11 +205,11 @@ jobs:
 
                         #Create policy for boundary to access role
                         echo "{\"name\":\"${db_policy}\",\"policy\":\"path \\\"database/creds/${db_credential_create_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\"}" > vault_boundary_policy.json
-                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_boundary_policy.json http://vault.default:8200/v1/sys/policy/$db_policy
+                        curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @vault_boundary_policy.json http://vault.default:8200/v1/sys/policy/$db_policy
 
                         #Generate vault token
                         echo "{ \"policies\": [\"${db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"20m\",\"renewable\": true }" > vault_db_token_payload.json
-                        boundary_token=$(curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @vault_db_token_payload.json http://vault.default:8200/v1/auth/token/create | jq '.auth.client_token' )
+                        boundary_token=$(curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @vault_db_token_payload.json http://vault.default:8200/v1/auth/token/create | jq '.auth.client_token' )
                         echo Token to put in boundary $boundary_token
 
                         #Create credential store in boundary
