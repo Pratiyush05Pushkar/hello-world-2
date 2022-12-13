@@ -15,15 +15,16 @@ host-catalog:
                       address: livspace-staging-mysql5.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username: livspace
                       password: LivspaceRandomStaging123
-                - name: nms_1_postgres_156_set
+                - name: nms_1_postgres_157_set
                   description: descrmicroervice_2 /optional
                   target:
-                      name: nms_1_postgres_156_target
+                      name: nms_1_postgres_157_target
                       description: dedede
                       default_port: 5432
                   hosts:
-                      name: nms_1_postgres_156
+                      name: nms_1_postgres_157
                       description: descri st_name_2 /optional
-                      address: livspace-dev-mysql8-cluster.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
-                      username:
-                      password:
+                      address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
+                      database_name: sqlpad
+                      username: livspace
+                      password: LivspaceRandomInfra12345

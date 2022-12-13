@@ -107,6 +107,7 @@ jobs:
 
                     else
                         #newly created host-set in recent git-push 
+
                         #extract host-set config from yaml file 
                         hs=$diff_hs yq '.host-catalog.host-sets[] | select(.name==env(hs))' $val > data.yaml
 
@@ -163,7 +164,12 @@ jobs:
                           curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @allowed_role_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
                         
                         elif [ $target_default_port == 5432 ] ;then
-                            echo Postgres
+
+                          database_name=$(yq ".hosts.database_name" data.yaml)
+                          echo "{\"backend\":\"database\",\"name\":\"${db_connection_name}\",\"plugin_name\":\"postgresql-database-plugin\",\"verify_connection\":true,\"connection_url\":\"postgresql://{{username}}:{{password}}@${host_ip}:5432/${database_name}\",\"username\":\"${host_username}\",\"password\":\"${host_password}\",\"max_open_connections\":4,\"max_idle_connections\":0,\"max_connection_lifetime\":\"0s\"}" > db_connection_payload.json
+                          curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request POST --data @db_connection_payload.json http://vault.default:8200/v1/database/config/$db_connection_name
+
+                          
                         fi
 
                         #policy for boundary to access db_connection_role 
