@@ -62,10 +62,11 @@ jobs:
                   rm -f host_catalog.json
                 fi
                 
-                #get host-sets , hosts and targets which are already present 
+                #get host-sets , hosts , targets and credential stores which are already present 
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
                 curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/targets?scope_id=$project_id > all_targets.json
+                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
 
                 #host-sets already present in Boudary
                 old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
@@ -84,6 +85,7 @@ jobs:
                         host_set_name=$diff_hs
                         host_name=$( echo "${diff_hs%_set}" )
                         target_name="$( echo $host_name )_target"
+                        credential_store_name="$( echo $host_name )_cred_store"
 
                         echo To delete $host_set_name $host_name $target_name
 
@@ -105,6 +107,24 @@ jobs:
                         target_id_to_del_trim="${target_id_to_del_trim#\"}"
                         curl --header "Authorization: Bearer ${token}" --request DELETE http://boundary-release.default:9200/v1/targets/$target_id_to_del_trim
 
+                        #delete credential store
+                        credential_store_id_to_del=$(jq -r --arg cred_name $credential_store_name '.items[] | select(.name==$cred_name) | .id' all_credential_stores.json)
+                        credential_store_id_to_del_trim="${credential_store_id_to_del%\"}"
+                        credential_store_id_to_del_trim="${credential_store_id_to_del_trim#\"}"
+                        curl --header "Authorization: Bearer ${token}" --request DELETE http://boundary-release.default:9200/v1/credential-stores/$credential_store_id_to_del_trim
+
+                        #delete db_role from vault
+                        db_role_name=$( echo $host_name )_role
+                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request DELETE http://vault.default:8200/v1/database/roles/${db_role_name}
+
+                        #delete db_connection from vault
+                        db_connection_name=$( echo $host_name )_db
+                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request DELETE http://vault.default:8200/v1/database/config/${db_connection_name}
+
+                        #delete boundary access policy from vault
+                        db_policy_name=$( echo $host_name )_db_policy"
+                        curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request DELETE http://vault.default:8200/v1/sys/policies/acl/${db_policy_name}
+                      
                     else
                         #newly created host-set in recent git-push 
 
