@@ -122,7 +122,7 @@ jobs:
                         curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request DELETE http://vault.default:8200/v1/database/config/${db_connection_name}
 
                         #delete boundary access policy from vault
-                        db_policy_name=$( echo $host_name )_db_policy"
+                        db_policy_name=$( echo $host_name )_db_policy
                         curl --header "X-Vault-Token:hvs.H7s7wPTdZ5nN0lYlBVWsRyF2" --request DELETE http://vault.default:8200/v1/sys/policies/acl/${db_policy_name}
                       
                     else
