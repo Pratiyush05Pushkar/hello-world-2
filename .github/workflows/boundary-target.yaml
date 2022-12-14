@@ -6,7 +6,7 @@ on: push
 
 jobs:  
   build:
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
     name: Put targets in boundary
     steps:
       - uses: dcarbone/install-yq-action@v1.0.0
