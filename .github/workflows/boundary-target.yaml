@@ -35,7 +35,9 @@ jobs:
             readonly AUTH_ID="ampw_sC1BbzThIj"
             readonly BOUNDARY_URL="http://boundary-release.default:9200";
             readonly VAULT_URL="http://vault.default:8200";
+            
             #genericMethods
+            
             #deleteEntityById(filename, entityName, entityDeleteEndpoint, token)
             deleteEntityById(){
               entity_id_to_del=$(jq -r --arg entity_name $2 '.items[] | select(.name==$entity_name) | .id' $1)
@@ -43,18 +45,22 @@ jobs:
               entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
               curl --header "Authorization: Bearer ${4}" --request DELETE $BOUNDARY_URL/$3$entity_id_to_del_trim
             }
+            
             #getRequest(token, endpoint)
             getRequest() {
               curl --header "Authorization: Bearer $1" --request GET $BOUNDARY_URL/$2
             }
+            
             #deleteFromVaultRequest(endpoint)
             deleteFromVaultRequest(){
               curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE $VAULT_URL/$1
             }
+            
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
-            curl --request POST --data @payload.json $BOUNDARY_URL"v1/auth-methods/${AUTH_ID}:authenticate" > response.json
+            curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
             token=$(jq -r '.attributes.token' response.json)
             echo $token
+            
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} 
             do 
                 #get project id
@@ -71,7 +77,7 @@ jobs:
                 host_catalog_description=$(yq ".host-catalog.description" $val)
                 
                 #get host-catalog list
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL"v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
                 host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
                 
                 #if host-catalog doesnot exists , we need to create it 
