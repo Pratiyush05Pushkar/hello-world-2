@@ -1,11 +1,12 @@
+
 name: Put targets in boundary 
-run-name: Add targets in boundary
+run-name: Adding targets in boundary
 
 on: push
 
 jobs:  
   build:
-    runs-on: self-hosted
+    runs-on: [self-hosted, linux]
     name: Put targets in boundary
     steps:
       - uses: dcarbone/install-yq-action@v1.0.0
@@ -13,7 +14,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 
-      - name: Get changed files in the docs folder
+      - name: Read files changed in recent git push
         id: changed-files-specific
         uses: tj-actions/changed-files@v34
         with:
@@ -28,15 +29,30 @@ jobs:
       # Prints the changes when done / added - Git Actions does not run when file is removed ******
       - name: To upload targets 
         run: |
-            #constants
-            readonly STAGE_PROJECT_ID=""
-            readonly PRODUCTION_PROJECT_ID=""
-            readonly BOUNDARY_URL="http://boundary-release.default:9200/"
-            readonly VAULT_URL="http://vault.default:8200/"
-
-
+            #globally used constants
+            readonly STAGE_PROJECT_ID="p_Jv4BjggzW9";
+            readonly PROD_PROJECT_ID="p_HBZMfr6PcE";
+            readonly AUTH_ID="ampw_sC1BbzThIj"
+            readonly BOUNDARY_URL="http://boundary-release.default:9200";
+            readonly VAULT_URL="http://vault.default:8200";
+            #genericMethods
+            #deleteEntityById(filename, entityName, entityDeleteEndpoint, token)
+            deleteEntityById(){
+              entity_id_to_del=$(jq -r --arg entity_name $2 '.items[] | select(.name==$entity_name) | .id' $1)
+              entity_id_to_del_trim="${entity_id_to_del%\"}"
+              entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
+              curl --header "Authorization: Bearer ${4}" --request DELETE $BOUNDARY_URL/$3$entity_id_to_del_trim
+            }
+            #getRequest(token, endpoint)
+            getRequest() {
+              curl --header "Authorization: Bearer $1" --request GET $2
+            }
+            #deleteFromVaultRequest(endpoint)
+            deleteFromVaultRequest(){
+              curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE $1
+            }
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
-            curl --request POST --data @payload.json http://boundary-release.default:9200/v1/auth-methods/ampw_sC1BbzThIj:authenticate > response.json
+            curl --request POST --data @payload.json $BOUNDARY_URL"v1/auth-methods/${AUTH_ID}:authenticate" > response.json
             token=$(jq -r '.attributes.token' response.json)
             echo $token
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} 
@@ -46,41 +62,37 @@ jobs:
                 project_id=""
                 if [ $project_name == "stage" ] ;
                 then
-                  project_id="p_Jv4BjggzW9"
+                  project_id=$STAGE_PROJECT_ID
                 else
-                  project_id="p_HBZMfr6PcE"
+                  project_id=$PROD_PROJECT_ID
                 fi
-
                 #read host-catalog from yaml file 
                 host_catalog_name=$(yq ".host-catalog.name" $val)
                 host_catalog_description=$(yq ".host-catalog.description" $val)
                 
-                
                 #get host-catalog list
-                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL"v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
                 host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
                 
                 #if host-catalog doesnot exists , we need to create it 
                 if [ -z "$host_catalog_id" ] ;
                 then
-                  echo HOst_catalog_id $host_catalog_id
+                  echo Host_catalog_id $host_catalog_id
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
-                  host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json http://boundary-release.default:9200/v1/host-catalogs | jq '.id' )
+                  host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json $BOUNDARY_URL/v1/host-catalogs | jq '.id' )
                   rm -f host_catalog.json
                 fi
                 
                 #get host-sets , hosts , targets and credential stores which are already present 
-                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
-                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
-                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/targets?scope_id=$project_id > all_targets.json
-                curl --header "Authorization: Bearer ${token}" --request GET http://boundary-release.default:9200/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
-
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/targets?scope_id=$project_id > all_targets.json
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
                 #host-sets already present in Boudary
                 old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
                 
                 #host-sets in recent yaml file 
                 new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
-
                 #diff gets us deleted host-sets and newly created host-sets 
                 diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
                 
@@ -88,62 +100,40 @@ jobs:
                 do
                     if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
                         #deleted host-set in recent git-push
-
                         host_set_name=$diff_hs
                         host_name=$( echo "${diff_hs%_set}" )
                         target_name="$( echo $host_name )_target"
                         credential_store_name="$( echo $host_name )_cred_store"
-
                         echo To delete $host_set_name $host_name $target_name
-
+                        #deleteEntityById(filename, entityType, entityDeleteEndpoint)
                         #delete host
-                        host_id_to_del=$(jq -r --arg h_name $host_name '.items[] | select(.name==$h_name) | .id' all_hosts.json)
-                        host_id_to_del_trim="${host_id_to_del%\"}"
-                        host_id_to_del_trim="${host_id_to_del_trim#\"}"
-                        curl --header "Authorization: Bearer ${token}" --request DELETE http://boundary-release.default:9200/v1/hosts/$host_id_to_del_trim
-
+                        deleteEntityById all_hosts.json $host_name "v1/hosts/" $token
                         #delete host-set
-                        host_set_id_to_del=$(jq -r --arg hst_name $host_set_name '.items[] | select(.name==$hst_name) | .id' all_host_sets.json)
-                        host_set_id_to_del_trim="${host_set_id_to_del%\"}"
-                        host_set_id_to_del_trim="${host_set_id_to_del_trim#\"}"
-                        curl --header "Authorization: Bearer ${token}" --request DELETE http://boundary-release.default:9200/v1/host-sets/$host_set_id_to_del_trim
-
+                        deleteEntityById all_host_sets.json $host_set_name "v1/host-sets/" $token
+                      
                         #delete target 
-                        target_id_to_del=$(jq -r --arg t_name $target_name '.items[] | select(.name==$t_name) | .id' all_targets.json)
-                        target_id_to_del_trim="${target_id_to_del%\"}"
-                        target_id_to_del_trim="${target_id_to_del_trim#\"}"
-                        curl --header "Authorization: Bearer ${token}" --request DELETE http://boundary-release.default:9200/v1/targets/$target_id_to_del_trim
-
+                        deleteEntityById all_targets.json $target_name "v1/targets/" $token
                         #delete credential store
-                        credential_store_id_to_del=$(jq -r --arg cred_name $credential_store_name '.items[] | select(.name==$cred_name) | .id' all_credential_stores.json)
-                        credential_store_id_to_del_trim="${credential_store_id_to_del%\"}"
-                        credential_store_id_to_del_trim="${credential_store_id_to_del_trim#\"}"
-                        curl --header "Authorization: Bearer ${token}" --request DELETE http://boundary-release.default:9200/v1/credential-stores/$credential_store_id_to_del_trim
-
+                        deleteEntityById all_credential_stores.json $credential_store_name "v1/credential-stores/" $token
                         #delete db_role from vault
                         db_role_name=$( echo $host_name )_role
-                        curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request DELETE http://vault.default:8200/v1/database/roles/${db_role_name}
-
+                        deleteFromVaultRequest $VAULT_URL/v1/database/roles/${db_role_name}
                         #delete db_connection from vault
                         db_connection_name=$( echo $host_name )_db
-                        curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request DELETE http://vault.default:8200/v1/database/config/${db_connection_name}
-
+                        deleteFromVaultRequest $VAULT_URL/v1/database/config/${db_connection_name}
                         #delete boundary access policy from vault
                         db_policy_name=$( echo $host_name )_db_policy
-                        curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request DELETE http://vault.default:8200/v1/sys/policies/acl/${db_policy_name}
+                        deleteFromVaultRequest $VAULT_URL/v1/sys/policies/acl/${db_policy_name}
                       
                     else
                         #newly created host-set in recent git-push 
-
                         #extract host-set config from yaml file 
                         hs=$diff_hs yq '.host-catalog.host-sets[] | select(.name==env(hs))' $val > data.yaml
-
                         #create host-set
                         host_set_name=$(yq ".name" data.yaml)
                         host_set_description=$(yq ".description" data.yaml)
                         echo "{\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_set_name}\",\"description\":\"${host_set_description}\"}" > new_host_set.json
-                        host_set_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @new_host_set.json http://boundary-release.default:9200/v1/host-sets | jq '.id' )
-
+                        host_set_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @new_host_set.json $BOUNDARY_URL/v1/host-sets | jq '.id' )
                         #create host
                         host_name=$(yq ".hosts.name" data.yaml)
                         host_description=$(yq ".hosts.description" data.yaml)
@@ -151,28 +141,24 @@ jobs:
                         host_username=$(yq ".hosts.username" data.yaml)
                         host_password=$(yq ".hosts.password" data.yaml)
                         echo "{\"attributes\":{\"address\":\"${host_ip}\"},\"type\":\"static\",\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_name}\",\"description\":\"${host_description}\"}" > host.json
-                        host_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host.json http://boundary-release.default:9200/v1/hosts | jq '.id' )
-
-
+                        host_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host.json $BOUNDARY_URL/v1/hosts | jq '.id' )
                         #add host to host-set
                         echo "{\"version\":1,\"host_ids\":[${host_id}]}" > add_host_to_host_set.json
                         host_set_id_trim="${host_set_id%\"}"
                         host_set_id_trim="${host_set_id_trim#\"}"
-                        curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_to_host_set.json http://boundary-release.default:9200/v1/host-sets/$host_set_id_trim:add-hosts
-
+                        curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_to_host_set.json $BOUNDARY_URL/v1/host-sets/$host_set_id_trim:add-hosts
                         #create target 
                         target_name=$(yq ".target.name" data.yaml)
                         target_description=$(yq ".target.description" data.yaml)
                         target_default_port=$(yq ".target.default_port" data.yaml)
                         echo "{\"attributes\":{\"default_port\":${target_default_port}},\"type\":\"tcp\",\"name\":\"${target_name}\",\"description\":\"${target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
                         cat target.json
-                        target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json http://boundary-release.default:9200/v1/targets | jq '.id' )
-
+                        target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json $BOUNDARY_URL/v1/targets | jq '.id' )
                         #add host-set in target
                         echo "{\"version\":1,\"host_source_ids\":[${host_set_id}]}" > add_host_set_to_target.json
                         target_id_trim="${target_id%\"}"
                         target_id_trim="${target_id_trim#\"}"
-                        curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json http://boundary-release.default:9200/v1/targets/$target_id_trim:add-host-sources
+                        curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json $BOUNDARY_URL/v1/targets/$target_id_trim:add-host-sources
                         rm -f add_host_set_to_target.json
                         
                         db_connection_name="$( echo $host_name )_db"
@@ -180,71 +166,59 @@ jobs:
                         if [ $target_default_port == 3306 ] ;then
                           
                           echo "{\"backend\":\"database\",\"name\":\"${db_connection_name}\",\"plugin_name\":\"mysql-database-plugin\",\"verify_connection\":true,\"connection_url\":\"{{username}}:{{password}}@tcp(${host_ip}:3306)\/\",\"username\":\"${host_username}\",\"password\":\"${host_password}\",\"max_open_connections\":4,\"max_idle_connections\":0,\"max_connection_lifetime\":\"0s\"}" > db_connection_payload.json
-                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_connection_payload.json http://vault.default:8200/v1/database/config/$db_connection_name
-
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_connection_payload.json $VAULT_URL/v1/database/config/$db_connection_name
                           #creat vault role for database-user creation
                           echo "{\"backend\":\"database\",\"name\":\"${db_credential_create_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
-                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_role_payload.json http://vault.default:8200/v1/database/roles/$db_credential_create_role
-
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_role_payload.json $VAULT_URL/v1/database/roles/$db_credential_create_role
                           #add role in DB connection
                           echo "{\"allowed_roles\":[\"${db_credential_create_role}\"]}" > allowed_role_payload.json
-                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @allowed_role_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @allowed_role_payload.json $VAULT_URL/v1/database/config/$db_connection_name 
                         
                         elif [ $target_default_port == 5432 ] ;then
                           
                           echo Postgres db connection 
                           database_name=$(yq ".hosts.database_name" data.yaml)
                           echo "{\"backend\":\"database\",\"name\":\"${db_connection_name}\",\"plugin_name\":\"postgresql-database-plugin\",\"verify_connection\":true,\"connection_url\":\"postgresql://{{username}}:{{password}}@${host_ip}:5432/${database_name}\",\"username\":\"${host_username}\",\"password\":\"${host_password}\",\"max_open_connections\":4,\"max_idle_connections\":0,\"max_connection_lifetime\":\"0s\"}" > db_connection_payload.json
-                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_connection_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_connection_payload.json $VAULT_URL/v1/database/config/$db_connection_name 
                           
                           #creat vault role for database-user creation
                           echo "{\"backend\":\"database\",\"name\":\"${db_credential_create_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE ROLE \\\"{{name}}\\\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT SELECT ON ALL TABLES IN SCHEMA public TO \\\"{{name}}\\\";\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
-                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_role_payload.json http://vault.default:8200/v1/database/roles/$db_credential_create_role
-
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_role_payload.json $VAULT_URL/v1/database/roles/$db_credential_create_role
                           #add role in DB connection
                           echo "{\"allowed_roles\":[\"${db_credential_create_role}\"]}" > allowed_role_payload.json
-                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @allowed_role_payload.json http://vault.default:8200/v1/database/config/$db_connection_name 
+                          curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @allowed_role_payload.json $VAULT_URL/v1/database/config/$db_connection_name 
                           
                         fi
-
                         #policy for boundary to access db_connection_role 
                         db_policy="$( echo $host_name )_db_policy"
-
                         #Create policy for boundary to access role
                         echo "{\"name\":\"${db_policy}\",\"policy\":\"path \\\"database/creds/${db_credential_create_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\"}" > vault_boundary_policy.json
-                        curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @vault_boundary_policy.json http://vault.default:8200/v1/sys/policy/$db_policy
-
+                        curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_boundary_policy.json $VAULT_URL/v1/sys/policy/$db_policy
                         #Generate vault token
                         echo "{ \"policies\": [\"${db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"20m\",\"renewable\": true }" > vault_db_token_payload.json
-                        boundary_token=$(curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @vault_db_token_payload.json http://vault.default:8200/v1/auth/token/create | jq '.auth.client_token' )
+                        boundary_token=$(curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_db_token_payload.json $VAULT_URL/v1/auth/token/create | jq '.auth.client_token' )
                         echo Token to put in boundary $boundary_token
-
                         #Create credential store in boundary
                         credential_store_name="$( echo $host_name )_cred_store"
-                        echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"http://vault.default:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_id}\"}" > credential_store_payload.json
+                        echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"$VAULT_URL/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_id}\"}" > credential_store_payload.json
                         
-                        credential_store_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json http://boundary-release.default:9200/v1/credential-stores | jq '.id' )
+                        credential_store_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json $BOUNDARY_URL/v1/credential-stores | jq '.id' )
                         echo Credential_store_id created is $credential_store_id
-
                         #create credential library
                         credential_library_name="$( echo $host_name )_cred_lib"
                         echo "{\"type\":\"vault\",\"credential_store_id\":${credential_store_id},\"name\":\"${credential_library_name}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_create_role}\"}}" > cred_lib_info.json
                         
-                        cred_lib_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json http://boundary-release.default:9200/v1/credential-libraries | jq '.id' )
+                        cred_lib_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json $BOUNDARY_URL/v1/credential-libraries | jq '.id' )
                         echo Credential_lib created $cred_lib_id
-
                         #add credential library to target
                         echo "{\"version\":2,\"application_credential_source_ids\":[${cred_lib_id}]}" > add_cred_lib_to_target.json
                         echo payload for target add 
                         cat add_cred_lib_to_target.json
-                        curl --header "Authorization: Bearer ${token}" --request POST --data @add_cred_lib_to_target.json http://boundary-release.default:9200/v1/targets/$target_id_trim:add-credential-sources
+                        curl --header "Authorization: Bearer ${token}" --request POST --data @add_cred_lib_to_target.json $BOUNDARY_URL/v1/targets/$target_id_trim:add-credential-sources
                     fi
                     
                 done 
-
-
             done
             
         
           
-

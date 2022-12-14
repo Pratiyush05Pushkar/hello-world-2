@@ -11,7 +11,7 @@ host-catalog:
                       default_port: 3306
                   hosts:
                       name: nms_backend_46
-                      description: de s_e_1.1 /optioa
+                      description: de s_e_1.1 /optio
                       address: livspace-staging-mysql5.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username: livspace
                       password: LivspaceRandomStaging123
