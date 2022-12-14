@@ -45,11 +45,11 @@ jobs:
             }
             #getRequest(token, endpoint)
             getRequest() {
-              curl --header "Authorization: Bearer $1" --request GET $2
+              curl --header "Authorization: Bearer $1" --request GET $BOUNDARY_URL/$2
             }
             #deleteFromVaultRequest(endpoint)
             deleteFromVaultRequest(){
-              curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE $1
+              curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE $VAULT_URL/$1
             }
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
             curl --request POST --data @payload.json $BOUNDARY_URL"v1/auth-methods/${AUTH_ID}:authenticate" > response.json
