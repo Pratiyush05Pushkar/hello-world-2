@@ -240,6 +240,8 @@ jobs:
                         #Create credential store in boundary
                         credential_store_name="$( echo $host_name )_cred_store"
                         echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"$VAULT_URL/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_id}\"}" > credential_store_payload.json
+                        echo Credential_store file is having ------
+                        cat credential_store_payload.json
                         
                         credential_store_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json $BOUNDARY_URL/v1/credential-stores | jq '.id' )
                         echo Credential_store_id created is $credential_store_id
