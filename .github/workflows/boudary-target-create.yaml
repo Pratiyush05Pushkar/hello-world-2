@@ -86,6 +86,8 @@ jobs:
                   echo Host_catalog_id $host_catalog_id
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
                   host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json $BOUNDARY_URL/v1/host-catalogs | jq '.id' )
+                  host_catalog_id_trim="${host_catalog_id%\"}"
+                  host_catalog_id="${host_catalog_id_trim#\"}"
                   rm -f host_catalog.json
                 fi
                 
