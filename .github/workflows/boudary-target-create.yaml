@@ -104,6 +104,7 @@ jobs:
                 #diff gets us deleted host-sets and newly created host-sets 
                 diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
                 echo Diff_host_Set is $diff_host_set
+                echo Host_Catalog_Id $host_catalog_id
 
                 for diff_hs in $diff_host_set
                 do
