@@ -18,7 +18,8 @@ jobs:
         uses: tj-actions/changed-files@v34
         with:
           files: |
-            Vault-secrets/boundary/**
+            Vault-secrets/boundary/prod/apps/**
+            Vault-secrets/boundary/stage/apps/**
       # - name: Run step if any file(s) in the Vault-secret folder change
       #   if: steps.changed-files-specific.outputs.any_changed == 'true'
       #   run: |
@@ -65,10 +66,12 @@ jobs:
                 #get project id
                 project_name=$(yq ".project" $val)
                 project_id=""
-                if [ $project_name == "stage" ] ;
+                if [[ $val == *"/stage/"* ]] ;
                 then
+                  echo STAGING $val
                   project_id=$STAGE_PROJECT_ID
                 else
+                  echo PROD $val
                   project_id=$PROD_PROJECT_ID
                 fi
 
