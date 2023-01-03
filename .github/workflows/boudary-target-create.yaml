@@ -33,8 +33,8 @@ jobs:
             readonly STAGE_PROJECT_ID="p_Jv4BjggzW9";
             readonly PROD_PROJECT_ID="p_HBZMfr6PcE";
             readonly AUTH_ID="ampw_sC1BbzThIj"
-            readonly BOUNDARY_URL="http://boundary-release.default:9200";
-            readonly VAULT_URL="http://vault.default:8200";
+            readonly BOUNDARY_URL="http://127.0.0.1:9200";
+            readonly VAULT_URL="http://127.0.0.1:8200";
 
             #genericMethods
 
