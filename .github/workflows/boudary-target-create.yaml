@@ -204,7 +204,7 @@ jobs:
                           curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_connection_payload.json $VAULT_URL/v1/database/config/$db_connection_name
 
                           #creat vault role for database-user creation
-                          echo "{\"backend\":\"database\",\"name\":\"${db_credential_create_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT ALL ON *.* TO '{{name}}'@'%';FLUSH PRIVILEGES;\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
+                          echo "{\"backend\":\"database\",\"name\":\"${db_credential_create_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT ALL ON nms_backend.* TO '{{name}}'@'%';FLUSH PRIVILEGES;\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
                           curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request POST --data @db_role_payload.json $VAULT_URL/v1/database/roles/$db_credential_create_role
 
                           #add role in DB connection
