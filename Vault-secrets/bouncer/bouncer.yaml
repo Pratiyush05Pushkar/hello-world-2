@@ -14,16 +14,10 @@ spec:
     vaultKubernetesMountPath: "kubernetes-testing"
     objects: |
       - objectName: "db-username1" 
-        secretPath: "secret/data/dbname-1210"
+        secretPath: "secret/data/DBcred"
         secretKey: "username-1"
       - objectName: "db-password-1"
-        secretPath: "secret/data/dbname-12dd10"
+        secretPath: "secret/data/DBcred"
         secretKey: "password-1"
-      - objectName: "dxb-usernamef-2"
-        secretPath: "secret/datfda/dbnadme-23dd3d313"
-        secretKey: "usernamed-2"
-      - objectName: "db-password-3"
-        secretPath: "secret/data/dbname-311d2"
-        secretKey: "password-3"
 
 
