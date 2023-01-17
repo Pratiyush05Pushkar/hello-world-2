@@ -32,38 +32,36 @@ jobs:
             do 
                 yq ".spec.parameters.objects" $val > object.yaml
                 cat object.yaml
-                
+                echo $val
                 all_secret_paths=$(yq ".[].secretPath" object.yaml)
                 final_policy=""
                 unique_secret_paths=$(echo "$all_secret_paths" |sort|uniq)
                 echo $all_secret_paths ;
                 echo $unique_secret_paths ;
                 
-                for val in $unique_secret_paths ;
+                for secret_path in $unique_secret_paths ;
                 do
-                    final_policy+="\n path \\\"${val}\\\" { \n \t capabilities = [\\\"read\\\"] \n } \n"
-                    echo $val
+                    final_policy+="\n path \\\"${secret_path}\\\" { \n \t capabilities = [\\\"read\\\"] \n } \n"
                 done
                 final_policy=\"$final_policy\"
                 echo $final_policy
-                
+                policy_name="$(yq ".metadata.name" $val )_policy"
                 echo "{ \"name\":\"${policy_name}\",\"policy\": ${final_policy} }" > payload.json
                 cat payload.json
                 echo Reached here 
-                echo $(yq ".spec.parameters.objects" $val)
-                policy_name="$(yq ".metadata.name" $val )_policy"
+                
                 echo Policy name is $policy_name
                 curl --header "X-Vault-Token:root" --request PUT --data @payload.json $VAULT_ADDR/v1/sys/policies/acl/$policy_name
 
-                # role_name="$(yq ".spec.parameters.roleName" $val )"
-                # kubernetes_auth_method="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
-                # serviceaccountname="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
-                # serviceaccount_namespace="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
+                role_name="$(yq ".spec.parameters.roleName" $val )"
+                kubernetes_auth_method="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
+                serviceaccountname="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
+                serviceaccount_namespace="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
 
-                # echo "{ \"bound_service_account_names\":[\"${serviceaccountname}\"],\"bound_service_account_namespaces\":[\"${serviceaccount_namespace}\"],\"token_policies\":[\"${policy_name}\"]}" > payload.json
+                echo "{ \"bound_service_account_names\":[\"${serviceaccountname}\"],\"bound_service_account_namespaces\":[\"${serviceaccount_namespace}\"],\"token_policies\":[\"${policy_name}\"]}" > payload.json
 
-                # echo $VAULT_ADDR/v1/auth/$kubernetes_auth_method/role/$role_name    
-                # curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/auth/$kubernetes_auth_method/role/$role_name    
+                echo $VAULT_ADDR/v1/auth/$kubernetes_auth_method/role/$role_name    
+                curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/auth/$kubernetes_auth_method/role/$role_name    
             done
         
           
