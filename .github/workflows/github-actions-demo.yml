@@ -48,6 +48,7 @@ jobs:
                 echo $final_policy
                 echo "{ \"policy\": ${final_policy} }" > payload.json
                 cat payload.json
+                echo Reached here 
                 policy_name="$(yq ".metadata.name" $val )_policy"
                 echo Policy name is $policy_name
                 curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/sys/policy/$policy_name
