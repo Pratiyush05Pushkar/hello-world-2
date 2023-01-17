@@ -52,17 +52,17 @@ jobs:
                 echo Reached here 
                 
                 echo Policy name is $policy_name
-                curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/sys/policies/acl/$policy_name
+                curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/sys/policy/$policy_name
 
-                role_name="$(yq ".spec.parameters.roleName" $val )"
-                kubernetes_auth_method="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
-                serviceaccountname="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
-                serviceaccount_namespace="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
+                # role_name="$(yq ".spec.parameters.roleName" $val )"
+                # kubernetes_auth_method="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
+                # serviceaccountname="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
+                # serviceaccount_namespace="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
 
-                echo "{ \"bound_service_account_names\":[\"${serviceaccountname}\"],\"bound_service_account_namespaces\":[\"${serviceaccount_namespace}\"],\"token_policies\":[\"${policy_name}\"]}" > payload.json
+                # echo "{ \"bound_service_account_names\":[\"${serviceaccountname}\"],\"bound_service_account_namespaces\":[\"${serviceaccount_namespace}\"],\"token_policies\":[\"${policy_name}\"]}" > payload.json
 
-                echo $VAULT_ADDR/v1/auth/$kubernetes_auth_method/role/$role_name    
-                curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/auth/$kubernetes_auth_method/role/$role_name    
+                # echo $VAULT_ADDR/v1/auth/$kubernetes_auth_method/role/$role_name    
+                # curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/auth/$kubernetes_auth_method/role/$role_name    
             done
         
           
