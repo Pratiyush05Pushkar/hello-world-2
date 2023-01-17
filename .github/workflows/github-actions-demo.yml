@@ -48,7 +48,8 @@ jobs:
                 echo $final_policy
                 echo "{ \"policy\": ${final_policy} }" > payload.json
                 cat payload.json
-                curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/sys/policy/apps/ABC
+                policy_name="$(yq ".metadata.name" $val )_policy"
+                curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/sys/policy/$policy_name
 
                 role_name="$(yq ".spec.parameters.roleName" $val )"
                 kubernetes_auth_method="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
