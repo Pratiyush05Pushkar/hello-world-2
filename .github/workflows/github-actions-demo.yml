@@ -46,13 +46,13 @@ jobs:
                 done
                 final_policy=\"$final_policy\"
                 echo $final_policy
-                policy_name="$(yq ".metadata.name" $val )_policy"
+                
                 echo "{ \"name\":\"${policy_name}\",\"policy\": ${final_policy} }" > payload.json
                 cat payload.json
                 echo Reached here 
-                
+                policy_name="$(yq ".metadata.name" $val )_policy"
                 echo Policy name is $policy_name
-                curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/sys/policy/$policy_name
+                curl --header "X-Vault-Token:root" --request PUT --data @payload.json $VAULT_ADDR/v1/sys/policies/acl/$policy_name
 
                 # role_name="$(yq ".spec.parameters.roleName" $val )"
                 # kubernetes_auth_method="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
