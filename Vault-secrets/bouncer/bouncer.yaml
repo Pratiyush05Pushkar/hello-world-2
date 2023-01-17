@@ -1,7 +1,7 @@
 apiVersion: secrets-store.csi.x-k8s.io/v1
 kind: SecretProviderClass
 metadata:
-  name: vault_daabse-1 # same as policyName & roleName
+  name: vault_dabse-1 # same as policyName & roleName
   namespace: prod # for making k8-role in vault
   labels:
     serviceAccountName: "dummy-service-account-name"
