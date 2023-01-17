@@ -3,13 +3,15 @@ kind: SecretProviderClass
 metadata:
   name: vault-databasing # same as policyName & roleName
   namespace: prod # for making k8-role in vault
-  labels: 
-    serviceAccountName: ""
+  labels:
+    serviceAccountName: "dummy-service-account-name"
+    namespace: "alpha"
 spec:
   provider: vault
   parameters:
     vaultAddress: "http://vault.default:8200"
-    roleName: "database"
+    roleName: "testing"
+    vaultKubernetesMountPath: "kubernetes-testing"
     objects: |
       - objectName: "db-username1" 
         secretPath: "secret/data/dbname-1210"
