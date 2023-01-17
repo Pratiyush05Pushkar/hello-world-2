@@ -50,7 +50,7 @@ jobs:
                 echo "{ \"name\":\"${policy_name}\",\"policy\": ${final_policy} }" > payload.json
                 cat payload.json
                 echo Reached here 
-                echo $(yq ".metadata.name" $val)
+                echo $(yq ".spec.parameters.objects" $val)
                 policy_name="$(yq ".metadata.name" $val )_policy"
                 echo Policy name is $policy_name
                 curl --header "X-Vault-Token:root" --request PUT --data @payload.json $VAULT_ADDR/v1/sys/policies/acl/$policy_name
