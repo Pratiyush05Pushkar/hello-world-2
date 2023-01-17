@@ -10,7 +10,7 @@ spec:
   provider: vault
   parameters:
     vaultAddress: "http://vault.default:8200"
-    roleName: "testing"
+    roleName: "test_role"
     vaultKubernetesMountPath: "kubernetes-testing"
     objects: |
       - objectName: "db-username1" 
