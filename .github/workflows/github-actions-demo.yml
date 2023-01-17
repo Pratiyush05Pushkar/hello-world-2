@@ -6,7 +6,7 @@ jobs:
     runs-on: self-hosted
     name: Auto-policy-role-update
     steps:
-      - uses: chrisdickinson/setup-yq@latest
+      - uses: dcarbone/install-yq-action@v1.0.0
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0 
@@ -25,12 +25,15 @@ jobs:
       # Prints the changes when done / added - Git Actions does not run when file is removed ******
       - name: Run this to read files changed in spc-yaml
         run: |
+            #globally used constants
+            readonly VAULT_ADDR="http://0.0.0.0:8200"
+
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} ;
             do 
-                yq r $val "spec.parameters.objects" > object.yaml
+                yq ".spec.parameters.objects" $val > object.yaml
                 cat object.yaml
                 
-                all_secret_paths=$(yq r object.yaml "[].secretPath")
+                all_secret_paths=$(yq ".[].secretPath" object.yaml)
                 final_policy=""
                 unique_secret_paths=$(echo "$all_secret_paths" |sort|uniq)
                 echo $all_secret_paths ;
@@ -45,7 +48,7 @@ jobs:
                 echo $final_policy
                 echo "{ \"policy\": ${final_policy} }" > payload.json
                 cat payload.json
-                curl --header "X-Vault-Token:root" --request POST --data @payload.json http://127.0.0.1:8200/v1/sys/policy/apps/ABC
+                curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/sys/policy/apps/ABC
             done
         
           
