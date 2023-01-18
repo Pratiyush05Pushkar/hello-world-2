@@ -51,7 +51,7 @@ jobs:
                 echo Reached here 
                 
                 echo Policy name is $policy_name
-                curl --header "X-Vault-Token:root" --request PUT --data @payload.json $VAULT_ADDR/v1/sys/policies/acl/$policy_name
+                curl --header "X-Vault-Token:root" --request POST --data @payload.json $VAULT_ADDR/v1/sys/policy/$policy_name
 
                 role_name="$(yq ".spec.parameters.roleName" $val )"
                 kubernetes_auth_method="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
