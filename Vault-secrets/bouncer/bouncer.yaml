@@ -1,16 +1,16 @@
 apiVersion: secrets-store.csi.x-k8s.io/v1
 kind: SecretProviderClass
 metadata:
-  name: vault_datbse-1 # same as policyName & roleName
+  name: vault_db_secret # same as policyName & roleName
   namespace: prod # for making k8-role in vault
   labels:
-    serviceAccountName: "dummy-service-account-name"
-    namespace: "alpha"
+    serviceAccountName: "apps service account name"
+    namespace: "apps namespace"
 spec:
   provider: vault
   parameters:
-    vaultAddress: "http://vault.default:8200"
-    roleName: "test_role"
+    vaultAddress: "http://0.0.0.0:8200"
+    roleName: "vault_db_role"
     vaultKubernetesMountPath: "kubernetes-testing"
     objects: |
       - objectName: "db-username1" 
