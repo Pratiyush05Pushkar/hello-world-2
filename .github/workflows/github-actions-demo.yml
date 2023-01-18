@@ -53,10 +53,10 @@ jobs:
                 echo Policy name is $policy_name
                 curl --header "X-Vault-Token:root" --request PUT --data @payload.json $VAULT_ADDR/v1/sys/policies/acl/$policy_name
 
-                role_name=$(yq ".spec.parameters.roleName" $val )
-                kubernetes_auth_method=$(yq ".spec.parameters.vaultKubernetesMountPath" $val )
-                serviceaccountname=$(yq ".spec.parameters.vaultKubernetesMountPath" $val )
-                serviceaccount_namespace=$(yq ".spec.parameters.vaultKubernetesMountPath" $val )
+                role_name="$(yq ".spec.parameters.roleName" $val )"
+                kubernetes_auth_method="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
+                serviceaccountname="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
+                serviceaccount_namespace="$(yq ".spec.parameters.vaultKubernetesMountPath" $val )"
 
                 echo "{ \"bound_service_account_names\":[\"${serviceaccountname}\"],\"bound_service_account_namespaces\":[\"${serviceaccount_namespace}\"],\"token_policies\":[\"${policy_name}\"]}" > payload.json
 
