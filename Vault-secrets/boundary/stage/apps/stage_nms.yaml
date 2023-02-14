@@ -19,7 +19,7 @@ host-catalog:
                   description: descrmicroervice_2 /optional
                   target:
                       name: nms_1_postgres_46_target
-                      description: dedeehhd
+                      description: dedeehh
                       default_port: 5432
                   hosts:
                       name: nms_1_postgres_46
