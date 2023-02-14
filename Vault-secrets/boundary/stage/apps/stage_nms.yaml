@@ -3,26 +3,26 @@ host-catalog:
           name: service_23_
           description: nms_servicederpton/optio
           host-sets:
-                - name: nms_backend_69_set
+                - name: nms_backend_45_set
                   description: dns_crosere_1 /optional
                   target:
-                      name: nms_backend_69_target
+                      name: nms_backend_45_target
                       description: deded
                       default_port: 3306
                   hosts:
-                      name: nms_backend_69
+                      name: nms_backend_45
                       description: de s_e_1.1 /oti
                       address: livspace-staging-mysql5.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       username: livspace
                       password: LivspaceRandomStaging123
-                - name: nms_1_postgres_58_set
+                - name: nms_1_postgres_45_set
                   description: descrmicroervice_2 /optional
                   target:
-                      name: nms_1_postgres_58_target
+                      name: nms_1_postgres_45_target
                       description: dedede
                       default_port: 5432
                   hosts:
-                      name: nms_1_postgres_58
+                      name: nms_1_postgres_45
                       description: descri st_name_2 /optional
                       address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       database_name: sqlpad
