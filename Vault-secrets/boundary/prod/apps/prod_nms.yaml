@@ -3,14 +3,14 @@ host-catalog:
           name: service_23_
           description: nms_servicederpton/optio
           host-sets:
-                - name: nms_1_postgres_461_set
+                - name: nms_1_postgres_46_set
                   description: descrmicroervice_2 /optional
                   target:
-                      name: nms_1_postgres_461_target
+                      name: nms_1_postgres_46_target
                       description: deed
                       default_port: 5432
                   hosts:
-                      name: nms_1_postgres_461
+                      name: nms_1_postgres_46
                       description: descri st_name_2 /optional
                       address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                       database_name: sqlpad
