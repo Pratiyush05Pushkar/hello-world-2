@@ -12,11 +12,11 @@ spec:
     roleName: dummy-app_role
     vaultAddress: https://vault.eng.livspace.com
     vaultKubernetesMountPath: kubernetes-eks-messier
-    objects:
+    objects: |
       - objectName: "db-pasword"
         secretKey: "db-password"
         secretPath: "secret/data/dummy-app/prod"
-      - objectName: "db-username-3"
+      - objectName: "db-username-65"
         secretKey: "db-username"
         secretPath: "secret/data/dummy-app/prod"
       - objectName: "some-other-secret"
