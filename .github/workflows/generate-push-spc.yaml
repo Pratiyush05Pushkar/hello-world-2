@@ -58,7 +58,7 @@ jobs:
               roleName: ${app_name}_role
               vaultAddress: https://vault.eng.livspace.com
               vaultKubernetesMountPath: $(yq ".vaultKubernetesMountPath" $file)
-              objects: |
+              objects: |" > ${file%vault-secrets*}vault-spcs/$app_name.yaml
               echo "$(yq '.spec.parameters.objects = load("data.yaml")' ${file%vault-secrets*}vault-spcs/$app_name.yaml ) " > ${file%vault-secrets*}vault-spcs/$app_name.yaml
              rm -f *.yaml
           done
