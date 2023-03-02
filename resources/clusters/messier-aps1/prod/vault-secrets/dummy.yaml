@@ -6,7 +6,7 @@ data:
     -   objectName: "db-pasword"
         secretKey: "db-password"
         secretValue: "password123"
-    -   objectName: "db-username"
+    -   objectName: "db-username-1"
         secretKey: "db-username"
         secretValue: "Admin123"
     -   objectName: "some-other-secret"
