@@ -1,0 +1,14 @@
+name: dummy-app
+namespace: prod
+serviceAccountName: dummy-sa
+vaultKubernetesMountPath: kubernetes-eks-messier
+data: 
+    -   objectName: "db-pasword"
+        secretKey: "db-password"
+        secretValue: "password123"
+    -   objectName: "db-username"
+        secretKey: "db-username"
+        secretValue: "Admin123"
+    -   objectName: "some-other-secret"
+        secretKey: "secretKey"
+        secretValue: "secretValue"

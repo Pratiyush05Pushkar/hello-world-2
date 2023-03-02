@@ -1,0 +1,83 @@
+name: Generate and push SPC file
+run-name: Generate and push SPC file
+on: 
+  pull_request:
+    types: [opened, reopened]
+    branches : 
+        - main
+    paths:
+        - manifests/resources/clusters/messier-aps1/prod/vault-secrets/**.yaml
+        - manifests/resources/clusters/messier-apse1/prod/vault-secrets/**.yaml
+        - manifests/resources/clusters/messier-apse1/prod-insecure/vault-secrets/**.yaml
+        - manifests/resources/clusters/pandora-apse1/alpha/vault-secrets/**.yaml
+        - manifests/resources/clusters/pandora-apse1/beta/vault-secrets/**.yaml
+jobs:  
+  build:
+    runs-on: self-hosted
+    name: Generate and push SPC file
+    steps:
+      - uses: dcarbone/install-yq-action@v1.0.0
+      - uses: dcarbone/install-jq-action@v1.0.1
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 
+      - name: Read files changed in recent git push
+        id: changed-files
+        uses: tj-actions/changed-files@v35
+        with:
+          files: |
+            manifests/resources/clusters/messier-aps1/prod/vault-secrets/**.yaml
+            manifests/resources/clusters/messier-apse1/prod/vault-secrets/**.yaml
+            manifests/resources/clusters/messier-apse1/prod-insecure/vault-secrets/**.yaml
+            manifests/resources/clusters/pandora-apse1/alpha/vault-secrets/**.yaml
+            manifests/resources/clusters/pandora-apse1/beta/vault-secrets/**.yaml
+      - name: To read a file and generate SPC
+  
+        run: |
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            echo "$file was changed"
+
+            app_name=$(yq ".name" $file)
+
+            #delete SPC if already exists
+            rm -f ${file%vault-secrets*}vault-spcs/$app_name.yaml
+
+            #create directory if it doesn't exist
+            mkdir -p ${file%vault-secrets*}vault-spcs
+            
+            #create secretPath for each secret
+            secret_path="secret/data/$(yq ".name" $file)/$(yq ".namespace" $file)"
+            yq '.data' $file > temp.yaml
+            yq '.[] |= (del(.secretValue))' temp.yaml > temp1.yaml
+            s_p=\"$secret_path\" yq '.[] += {"secretPath": env(s_p)}' temp1.yaml > data.yaml
+
+            #create SPC
+            echo "apiVersion: secrets-store.csi.x-k8s.io/v1
+          kind: SecretProviderClass
+          metadata:
+            name: $app_name
+            namespace: $(yq ".namespace" $file)
+            labels:
+              namespace: $(yq ".namespace" $file)
+              serviceAccountName: $(yq ".serviceAccountName" $file)
+          spec:
+            provider: vault
+            parameters:
+              roleName: ${app_name}_role
+              vaultAddress: https://vault.eng.livspace.com
+              vaultKubernetesMountPath: $(yq ".vaultKubernetesMountPath" $file)
+              objects: " > ${file%vault-secrets*}vault-spcs/$app_name.yaml
+              echo "$(yq '.spec.parameters.objects = load("data.yaml")' ${file%vault-secrets*}vault-spcs/$app_name.yaml ) " > ${file%vault-secrets*}vault-spcs/$app_name.yaml
+             rm -f *.yaml
+          done
+      - name: To push all changes to the same branch
+        run: |
+          if  ${{ steps.changed-files.outputs.any_changed }} ; then
+            git add .
+            git config --global user.name "Pratiyush05Pushkar"
+            git config --global user.email "pushkarpratiyush@gmail.com"
+            # git remote set-url origin https://x-access-token:${{ secrets.VAULT_CSI_GIT_TOKEN }}@github.com/${{ github.repository }}
+            git commit -m "Auto-generated app SPC"
+            git push  origin HEAD:${{ github.head_ref }}
+          fi
+      
