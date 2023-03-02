@@ -42,6 +42,7 @@ jobs:
             yq '.data' $file > temp.yaml
             yq '.[] |= (del(.secretValue))' temp.yaml > temp1.yaml
             s_p=\"$secret_path\" yq '.[] += {"secretPath": env(s_p)}' temp1.yaml > data.yaml
+            printf -v m "$(yq "." data.yaml)" ; m="$m" yq -n '.data = (strenv(m) | to_yaml)' > data2.yaml 
 
             #create SPC
             echo "apiVersion: secrets-store.csi.x-k8s.io/v1
@@ -59,7 +60,7 @@ jobs:
               vaultAddress: https://vault.eng.livspace.com
               vaultKubernetesMountPath: $(yq ".vaultKubernetesMountPath" $file)
               objects: |" > ${file%vault-secrets*}vault-spcs/$app_name.yaml
-              echo "$(yq '.spec.parameters.objects = load("data.yaml")' ${file%vault-secrets*}vault-spcs/$app_name.yaml ) " > ${file%vault-secrets*}vault-spcs/$app_name.yaml
+              echo "$(yq '.spec.parameters.objects = load("data2.yaml").data' ${file%vault-secrets*}vault-spcs/$app_name.yaml ) " > ${file%vault-secrets*}vault-spcs/$app_name.yaml
              rm -f *.yaml
           done
       - name: To push all changes to the same branch
