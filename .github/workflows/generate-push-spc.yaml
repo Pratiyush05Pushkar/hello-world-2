@@ -6,11 +6,7 @@ on:
     branches : 
         - main
     paths:
-        - manifests/resources/clusters/messier-aps1/prod/vault-secrets/**.yaml
-        - manifests/resources/clusters/messier-apse1/prod/vault-secrets/**.yaml
-        - manifests/resources/clusters/messier-apse1/prod-insecure/vault-secrets/**.yaml
-        - manifests/resources/clusters/pandora-apse1/alpha/vault-secrets/**.yaml
-        - manifests/resources/clusters/pandora-apse1/beta/vault-secrets/**.yaml
+        - resources/clusters/messier-aps1/prod/vault-secrets/**.yaml
 jobs:  
   build:
     runs-on: self-hosted
@@ -26,11 +22,7 @@ jobs:
         uses: tj-actions/changed-files@v35
         with:
           files: |
-            manifests/resources/clusters/messier-aps1/prod/vault-secrets/**.yaml
-            manifests/resources/clusters/messier-apse1/prod/vault-secrets/**.yaml
-            manifests/resources/clusters/messier-apse1/prod-insecure/vault-secrets/**.yaml
-            manifests/resources/clusters/pandora-apse1/alpha/vault-secrets/**.yaml
-            manifests/resources/clusters/pandora-apse1/beta/vault-secrets/**.yaml
+            resources/clusters/messier-aps1/prod/vault-secrets/**.yaml
       - name: To read a file and generate SPC
   
         run: |
