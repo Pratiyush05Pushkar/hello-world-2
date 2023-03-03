@@ -35,6 +35,11 @@ jobs:
 
             #create directory if it doesn't exist
             mkdir -p ${file%vault-secrets*}vault-spcs
+
+            #delete SPC from kustomization 
+            relative_spc_loc="./vault-spcs/$app_name.yaml"
+            yq -i ".resources -= [\"$relative_spc_loc\"]" ${file%vault-secrets*}kustomization.yaml
+
             
             #create secretPath for each secret
             secret_path="secret/data/$(yq ".name" $file)/$(yq ".namespace" $file)"
@@ -60,8 +65,14 @@ jobs:
               vaultKubernetesMountPath: $(yq ".vaultKubernetesMountPath" $file)
               objects: |" > ${file%vault-secrets*}vault-spcs/$app_name.yaml
               echo "$(yq '.spec.parameters.objects = load("data2.yaml").data' ${file%vault-secrets*}vault-spcs/$app_name.yaml ) " > ${file%vault-secrets*}vault-spcs/$app_name.yaml
+             
+             #Add file location in kustomization.yaml 
+             relative_spc_loc="./vault-spcs/$app_name.yaml"
+             yq -i ".resources += [\"$relative_spc_loc\"]" ${file%vault-secrets*}kustomization.yaml
+
              rm -f *.yaml
-            
+              
+             
           done
       - name: To push all changes to the same branch
         run: |
