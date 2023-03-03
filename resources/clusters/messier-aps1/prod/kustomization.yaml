@@ -1,1 +1,3 @@
 resources:
+  - ./vault-spcs/dummy-app.yaml
+  - ./vault-spcs/dummy-app.yaml
