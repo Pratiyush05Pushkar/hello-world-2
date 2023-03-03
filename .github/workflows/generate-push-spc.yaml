@@ -2,7 +2,6 @@ name: Generate and push SPC file
 run-name: Generate and push SPC file
 on: 
   pull_request:
-    types: [opened, reopened]
     branches : 
         - main
     paths:
