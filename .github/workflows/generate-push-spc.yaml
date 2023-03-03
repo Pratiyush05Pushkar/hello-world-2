@@ -15,7 +15,7 @@ jobs:
       - uses: dcarbone/install-jq-action@v1.0.1
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 
+          fetch-depth: 1
       - name: Read files changed in recent git push
         id: changed-files
         uses: tj-actions/changed-files@v35
@@ -61,8 +61,7 @@ jobs:
               objects: |" > ${file%vault-secrets*}vault-spcs/$app_name.yaml
               echo "$(yq '.spec.parameters.objects = load("data2.yaml").data' ${file%vault-secrets*}vault-spcs/$app_name.yaml ) " > ${file%vault-secrets*}vault-spcs/$app_name.yaml
              rm -f *.yaml
-
-             echo "Reaching here "
+            
           done
       - name: To push all changes to the same branch
         run: |
