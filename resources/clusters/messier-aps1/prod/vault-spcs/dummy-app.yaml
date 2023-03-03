@@ -19,6 +19,6 @@ spec:
       - objectName: "db-username-65"
         secretKey: "db-username"
         secretPath: "secret/data/dummy-app/prod"
-      - objectName: "some-other-secret"
+      - objectName: "some-othersecret"
         secretKey: "secretKey"
         secretPath: "secret/data/dummy-app/prod" 
