@@ -9,6 +9,6 @@ data:
     -   objectName: "db-username-65"
         secretKey: "db-username"
         secretValue: "Admin123"
-    -   objectName: "some-othersecret"
+    -   objectName: "someothersecret"
         secretKey: "secretKey"
         secretValue: "secretValue"
