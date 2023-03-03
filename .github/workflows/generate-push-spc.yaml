@@ -62,7 +62,7 @@ jobs:
               echo "$(yq '.spec.parameters.objects = load("data2.yaml").data' ${file%vault-secrets*}vault-spcs/$app_name.yaml ) " > ${file%vault-secrets*}vault-spcs/$app_name.yaml
              rm -f *.yaml
 
-             echo "Reaching here hh"
+             echo "Reaching here eee"
           done
       - name: To push all changes to the same branch
         run: |
