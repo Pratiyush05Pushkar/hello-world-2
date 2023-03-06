@@ -16,7 +16,7 @@ spec:
       - objectName: "db-pasword_test_2"
         secretKey: "db-password"
         secretPath: "secret/data/dummy-app/prod"
-      - objectName: "db-username-only-new-commit-now-removing-it-back"
+      - objectName: "db-username-only-new-commit"
         secretKey: "db-username"
         secretPath: "secret/data/dummy-app/prod"
       - objectName: "some-othersecret"
