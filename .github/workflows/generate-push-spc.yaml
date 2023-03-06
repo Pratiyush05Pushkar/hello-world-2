@@ -14,6 +14,8 @@ jobs:
       - uses: dcarbone/install-yq-action@v1.0.0
       - uses: dcarbone/install-jq-action@v1.0.1
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: Read files changed in recent git push
         id: changed-files
         uses: tj-actions/changed-files@v35
