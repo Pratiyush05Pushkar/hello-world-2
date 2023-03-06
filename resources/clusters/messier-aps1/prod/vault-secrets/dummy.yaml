@@ -6,11 +6,7 @@ data:
     -   objectName: "db-pasword"
         secretKey: "db-password"
         secretValue: "password123"
-<<<<<<< HEAD
-    -   objectName: "db-username-2"
-=======
     -   objectName: "db-username-65"
->>>>>>> main
         secretKey: "db-username"
         secretValue: "Admin123"
     -   objectName: "some-othersecret"
