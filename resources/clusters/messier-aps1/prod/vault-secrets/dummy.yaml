@@ -6,7 +6,7 @@ data:
     -   objectName: "db-pasword_test_2"
         secretKey: "db-password"
         secretValue: "password123"
-    -   objectName: "db-username-only-new-commit"
+    -   objectName: "db-username-only-new-commit-changed-done-here"
         secretKey: "db-username"
         secretValue: "Admin123"
     -   objectName: "some-othersecret"
