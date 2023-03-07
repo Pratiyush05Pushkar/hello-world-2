@@ -77,9 +77,11 @@ jobs:
       - name: To push all changes to the same branch
         run: |
           if  ${{ steps.changed-files.outputs.any_changed }} ; then
-            git add .
+
             git config --global user.name "Pratiyush05Pushkar"
             git config --global user.email "pushkarpratiyush@gmail.com"
+            git status 
+            git add .
             # git remote set-url origin https://x-access-token:${{ secrets.VAULT_CSI_GIT_TOKEN }}@github.com/${{ github.repository }}
             git commit -m "Auto-generated app SPC"
             git push  origin HEAD:${{ github.head_ref }}
