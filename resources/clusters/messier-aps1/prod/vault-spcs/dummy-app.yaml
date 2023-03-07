@@ -19,6 +19,6 @@ spec:
       - objectName: "db-username-only-new-commit-changed-done-here"
         secretKey: "db-username"
         secretPath: "secret/data/dummy-app/prod"
-      - objectName: "some-othersecret"
+      - objectName: "some-othersecretyyy"
         secretKey: "secretKey"
         secretPath: "secret/data/dummy-app/prod" 
