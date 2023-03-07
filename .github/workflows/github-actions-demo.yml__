@@ -7,7 +7,7 @@ jobs:
     name: Auto-policy-role-update
     steps:
       - uses: dcarbone/install-yq-action@v1.0.0
-      - uses: actions/checkout@v3
+      - uses: action/checkout@v3
         with:
           fetch-depth: 0 
       - name: Get changed files in the docs folder

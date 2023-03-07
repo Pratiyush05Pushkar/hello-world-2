@@ -3,12 +3,12 @@ namespace: prod
 serviceAccountName: dummy-sa
 vaultKubernetesMountPath: kubernetes-eks-messier
 data: 
-    -   objectName: "db-pasword"
+    -   objectName: "db-pasword_making_the_changes"
         secretKey: "db-password"
         secretValue: "password123"
-    -   objectName: "db-username-65"
+    -   objectName: "db-username-only-new-commit-changed-done-here"
         secretKey: "db-username"
         secretValue: "Admin123"
-    -   objectName: "some-othersecret"
+    -   objectName: "some-othersecretyyy"
         secretKey: "secretKey"
         secretValue: "secretValue"
