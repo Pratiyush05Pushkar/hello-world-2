@@ -80,6 +80,7 @@ jobs:
 
             git config --global user.name "Pratiyush05Pushkar"
             git config --global user.email "pushkarpratiyush@gmail.com"
+            echo "Printing git status"
             git status 
             git add .
             # git remote set-url origin https://x-access-token:${{ secrets.VAULT_CSI_GIT_TOKEN }}@github.com/${{ github.repository }}
