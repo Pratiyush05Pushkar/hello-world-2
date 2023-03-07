@@ -13,7 +13,7 @@ spec:
     vaultAddress: https://vault.eng.livspace.com
     vaultKubernetesMountPath: kubernetes-eks-messier
     objects: |
-      - objectName: "db-pasword_making_the_changes"
+      - objectName: "db-pasword_making_theiii_changes"
         secretKey: "db-password"
         secretPath: "secret/data/dummy-app/prod"
       - objectName: "db-username-only-new-commit-changed-done-here"
