@@ -76,13 +76,13 @@ jobs:
           done
       - name: To push all changes to the same branch
         run: |
-          if  ${{ steps.changed-files.outputs.any_changed }} ; then
+          git config --global user.name "Pratiyush05Pushkar"
+          git config --global user.email "pushkarpratiyush@gmail.com"
+          git checkout ${{ github.head_ref }}
+          changed_files=$( git diff --name-only HEAD^ )
+          if [[ $( echo $changed_files | grep "vault-secrets" ) ]]; then
 
-            git config --global user.name "Pratiyush05Pushkar"
-            git config --global user.email "pushkarpratiyush@gmail.com"
-            echo "Printing git status"
-            git status 
-            git checkout ${{ github.head_ref }}
+            
             echo "Printing status again"
             git status
             git add .
