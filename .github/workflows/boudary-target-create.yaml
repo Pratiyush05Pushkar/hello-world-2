@@ -20,6 +20,7 @@ jobs:
           files: |
             Vault-secrets/boundary/prod/apps/**
             Vault-secrets/boundary/stage/apps/**
+            .github/workflows/boudary-target-create.yaml
       # - name: Run step if any file(s) in the Vault-secret folder change
       #   if: steps.changed-files-specific.outputs.any_changed == 'true'
       #   run: |
@@ -61,6 +62,17 @@ jobs:
             curl --request POST --data @payload.json $BOUNDARY_URL"/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
             token=$(jq -r '.attributes.token' response.json)
             echo $token
+
+            only_git_action_update=false
+            changed_files=${{ steps.changed-files-specific.outputs.all_changed_files }}
+            if [[ $changed_files == "boundary-chart-ab/Chart.yaml" ]];
+            then
+                prod_files=$(find boundary-chart-ab -type f -name \*.yaml)
+                stage_files=$(find boundary-chart-28-Nov -type f -name \*.yaml)
+                changed_files=$(echo $prod_files $stage_files)
+                only_git_action_update=true
+            fi
+
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} 
             do 
                 #get project id
@@ -111,6 +123,10 @@ jobs:
                 echo Diff_host_Set is $diff_host_set
                 echo Host_Catalog_Id $host_catalog_id
 
+                if [ only_git_action_update == true ]; then
+                    diff_host_set=new_host_set_list
+                fi
+                
                 for diff_hs in $diff_host_set
                 do
                     if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
