@@ -45,9 +45,9 @@ jobs:
               entity_id_to_del=$(jq -r --arg entity_name $2 '.items[]? | select(.name==$entity_name) | .id' $1)
               entity_id_to_del_trim="${entity_id_to_del%\"}"
               entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
-              response_on_del=$(curl --header "Authorization: Bearer ${4}" --request DELETE $BOUNDARY_URL/$3$entity_id_to_del_trim)
+              curl --header "Authorization: Bearer ${4}" --request DELETE $BOUNDARY_URL/$3$entity_id_to_del_trim > response_on_del.json
               echo $3 used to delete $entity_id_to_del
-              echo Response on deleting $response_on_del
+              cat response_on_del.json
             }
 
             #getRequest(token, endpoint)
@@ -259,8 +259,10 @@ jobs:
                         #Create credential store in boundary
                         credential_store_name="$( echo $host_name )_cred_store"
                         echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"http://vault.default.svc.cluster.local:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_id}\"}" > credential_store_payload.json
-                        credential_store_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json $BOUNDARY_URL/v1/credential-stores | jq '.id' )
+                        curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json $BOUNDARY_URL/v1/credential-stores > cred_response.json
+                        credential_store_id=$(jq '.id' cred_response.json)
                         echo Credential_store with name $credential_store_name created with id $credential_store_id
+                        cat cred_response.json
                         
                         #create credential library
                         credential_library_name="$( echo $host_name )_cred_lib"
