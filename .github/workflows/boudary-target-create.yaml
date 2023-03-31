@@ -123,7 +123,7 @@ jobs:
                 echo Diff_host_Set is $diff_host_set
                 echo Host_Catalog_Id $host_catalog_id
 
-                if [ only_git_action_update == true ]; then
+                if [ "$only_git_action_update" == true ]; then
                     diff_host_set=new_host_set_list
                 fi
                 
