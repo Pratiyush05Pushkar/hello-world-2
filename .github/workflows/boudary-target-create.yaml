@@ -176,7 +176,8 @@ jobs:
                         host_set_description=$(yq ".description" data.yaml)
                         echo "{\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_set_name}\",\"description\":\"${host_set_description}\"}" > new_host_set.json
                         host_set_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @new_host_set.json $BOUNDARY_URL/v1/host-sets | jq '.id' )
-                        
+                        echo Create host-set $host_set_name with id $host_set_id
+
                         #create host
                         host_name=$(yq ".hosts.name" data.yaml)
                         host_description=$(yq ".hosts.description" data.yaml)
@@ -185,12 +186,14 @@ jobs:
                         host_password=$(yq ".hosts.password" data.yaml)
                         echo "{\"attributes\":{\"address\":\"${host_ip}\"},\"type\":\"static\",\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_name}\",\"description\":\"${host_description}\"}" > host.json
                         host_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host.json $BOUNDARY_URL/v1/hosts | jq '.id' )
-                        
+                        echo Create Host $host_name with id $host_id
+
                         #add host to host-set
                         echo "{\"version\":1,\"host_ids\":[${host_id}]}" > add_host_to_host_set.json
                         host_set_id_trim="${host_set_id%\"}"
                         host_set_id_trim="${host_set_id_trim#\"}"
                         curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_to_host_set.json $BOUNDARY_URL/v1/host-sets/$host_set_id_trim:add-hosts
+                        echo Added host $host_id in host-set $host_set_id_trim
                         
                         #create target 
                         target_name=$(yq ".target.name" data.yaml)
@@ -199,6 +202,7 @@ jobs:
                         echo "{\"attributes\":{\"default_port\":${target_default_port}},\"type\":\"tcp\",\"name\":\"${target_name}\",\"description\":\"${target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
                         cat target.json
                         target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json $BOUNDARY_URL/v1/targets | jq '.id' )
+                        echo Created Target $target_name with id $target_id
                         
                         #add host-set in target
                         echo "{\"version\":1,\"host_source_ids\":[${host_set_id}]}" > add_host_set_to_target.json
@@ -206,6 +210,7 @@ jobs:
                         target_id_trim="${target_id_trim#\"}"
                         curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json $BOUNDARY_URL/v1/targets/$target_id_trim:add-host-sources
                         rm -f add_host_set_to_target.json
+                        echo Added target $target_id_trim in host-set $host_set_id
                         
                         db_connection_name="$( echo $host_name )_db"
                         db_credential_create_role="$( echo $host_name )_role"
@@ -213,9 +218,11 @@ jobs:
                           
                           echo "{\"backend\":\"database\",\"name\":\"${db_connection_name}\",\"plugin_name\":\"mysql-database-plugin\",\"verify_connection\":true,\"connection_url\":\"{{username}}:{{password}}@tcp(${host_ip}:3306)\/\",\"username\":\"${host_username}\",\"password\":\"${host_password}\",\"max_open_connections\":4,\"max_idle_connections\":0,\"max_connection_lifetime\":\"0s\"}" > db_connection_payload.json
                           curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_connection_payload.json $VAULT_URL/v1/database/config/$db_connection_name
+                          
                           #creat vault role for database-user creation
                           echo "{\"backend\":\"database\",\"name\":\"${db_credential_create_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
                           curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_role_payload.json $VAULT_URL/v1/database/roles/$db_credential_create_role
+                          
                           #add role in DB connection
                           echo "{\"allowed_roles\":[\"${db_credential_create_role}\"]}" > allowed_role_payload.json
                           curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @allowed_role_payload.json $VAULT_URL/v1/database/config/$db_connection_name 
@@ -230,6 +237,7 @@ jobs:
                           #creat vault role for database-user creation
                           echo "{\"backend\":\"database\",\"name\":\"${db_credential_create_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE ROLE \\\"{{name}}\\\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; GRANT SELECT ON ALL TABLES IN SCHEMA public TO \\\"{{name}}\\\";\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
                           curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_role_payload.json $VAULT_URL/v1/database/roles/$db_credential_create_role
+                          
                           #add role in DB connection
                           echo "{\"allowed_roles\":[\"${db_credential_create_role}\"]}" > allowed_role_payload.json
                           curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @allowed_role_payload.json $VAULT_URL/v1/database/config/$db_connection_name 
@@ -237,9 +245,11 @@ jobs:
                         fi
                         #policy for boundary to access db_connection_role 
                         db_policy="$( echo $host_name )_db_policy"
+                        
                         #Create policy for boundary to access role
                         echo "{\"name\":\"${db_policy}\",\"policy\":\"path \\\"database/creds/${db_credential_create_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\"}" > vault_boundary_policy.json
                         curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_boundary_policy.json $VAULT_URL/v1/sys/policy/$db_policy
+                        
                         #Generate vault token
                         echo "{ \"policies\": [\"${db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"20m\",\"renewable\": true }" > vault_db_token_payload.json
                         boundary_token=$(curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_db_token_payload.json $VAULT_URL/v1/auth/token/create | jq '.auth.client_token' )
@@ -248,15 +258,15 @@ jobs:
                         #Create credential store in boundary
                         credential_store_name="$( echo $host_name )_cred_store"
                         echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"http://vault.default.svc.cluster.local:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_id}\"}" > credential_store_payload.json
-                        
                         credential_store_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json $BOUNDARY_URL/v1/credential-stores | jq '.id' )
-                        echo Credential_store_id created is $credential_store_id
+                        echo Credential_store with name $credential_store_name created with id $credential_store_id
+                        
                         #create credential library
                         credential_library_name="$( echo $host_name )_cred_lib"
                         echo "{\"type\":\"vault\",\"credential_store_id\":${credential_store_id},\"name\":\"${credential_library_name}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_create_role}\"}}" > cred_lib_info.json
-                        
                         cred_lib_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json $BOUNDARY_URL/v1/credential-libraries | jq '.id' )
                         echo Credential_lib created $cred_lib_id
+                        
                         #add credential library to target
                         echo "{\"version\":2,\"application_credential_source_ids\":[${cred_lib_id}]}" > add_cred_lib_to_target.json
                         echo payload for target add 
