@@ -65,7 +65,7 @@ jobs:
 
             only_git_action_update=false
             changed_files=${{ steps.changed-files-specific.outputs.all_changed_files }}
-            if [[ $changed_files == "boundary-chart-ab/Chart.yaml" ]];
+            if [[ $changed_files == ".github/workflows/boudary-target-create.yaml" ]];
             then
                 prod_files=$(find boundary-chart-ab -type f -name \*.yaml)
                 stage_files=$(find boundary-chart-28-Nov -type f -name \*.yaml)
