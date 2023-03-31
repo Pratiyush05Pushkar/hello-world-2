@@ -67,8 +67,8 @@ jobs:
             changed_files=${{ steps.changed-files-specific.outputs.all_changed_files }}
             if [[ $changed_files == ".github/workflows/boudary-target-create.yaml" ]];
             then
-                prod_files=$(find Vault-secrets/boundary/prod/apps/ -type f -name \*.yaml)
-                stage_files=$(find Vault-secrets/boundary/stage/apps/ -type f -name \*.yaml)
+                prod_files=$(find Vault-secrets/boundary/prod/apps -type f -name \*.yaml)
+                stage_files=$(find Vault-secrets/boundary/stage/apps -type f -name \*.yaml)
                 changed_files=$(echo $prod_files $stage_files)
                 only_git_action_update=true
             fi
