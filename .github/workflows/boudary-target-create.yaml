@@ -127,6 +127,8 @@ jobs:
                     diff_host_set=new_host_set_list
                 fi
                 
+                echo Diff_host_Set after changing is $diff_host_set
+                echo New_host_Set is $new_host_set_list
                 for diff_hs in $diff_host_set
                 do
                     if [[ $( echo $new_host_set_list | grep $diff_hs ) ]]; then
