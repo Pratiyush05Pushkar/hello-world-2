@@ -42,6 +42,8 @@ jobs:
 
             #deleteEntityById(filename, entityName, entityDeleteEndpoint, token)
             deleteEntityById(){
+              echo Trying to delete $3
+              cat $1
               entity_id_to_del=$(jq -r --arg entity_name $2 '.items[]? | select(.name==$entity_name) | .id' $1)
               entity_id_to_del_trim="${entity_id_to_del%\"}"
               entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
