@@ -47,6 +47,7 @@ jobs:
               entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
               curl --header "Authorization: Bearer ${4}" --request DELETE $BOUNDARY_URL/$3$entity_id_to_del_trim > response_on_del.json
               echo $3 used to delete $entity_id_to_del
+              echo Message is being displayed
               cat response_on_del.json
             }
 
