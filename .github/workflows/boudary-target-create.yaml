@@ -73,7 +73,7 @@ jobs:
                 only_git_action_update=true
             fi
 
-            for val in ${{ steps.changed-files-specific.outputs.all_changed_files }} 
+            for val in $changed_files 
             do 
                 #get project id
                 project_name=$(yq ".project" $val)
