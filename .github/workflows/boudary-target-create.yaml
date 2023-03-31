@@ -129,43 +129,7 @@ jobs:
                 
                 for diff_hs in $diff_host_set
                 do
-                    if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
-                        #deleted host-set in recent git-push
-
-                        host_set_name=$diff_hs
-                        host_name=$( echo "${diff_hs%_set}" )
-                        target_name="$( echo $host_name )_target"
-                        credential_store_name="$( echo $host_name )_cred_store"
-
-                        echo To delete $host_set_name $host_name $target_name
-
-                        #deleteEntityById(filename, entityType, entityDeleteEndpoint)
-
-                        #delete host
-                        deleteEntityById all_hosts.json $host_name "v1/hosts/" $token
-
-                        #delete host-set
-                        deleteEntityById all_host_sets.json $host_set_name "v1/host-sets/" $token
-                      
-                        #delete target 
-                        deleteEntityById all_targets.json $target_name "v1/targets/" $token
-
-                        #delete credential store
-                        deleteEntityById all_credential_stores.json $credential_store_name "v1/credential-stores/" $token
-
-                        #delete db_role from vault
-                        db_role_name=$( echo $host_name )_role
-                        deleteFromVaultRequest $VAULT_URL/v1/database/roles/${db_role_name}
-
-                        #delete db_connection from vault
-                        db_connection_name=$( echo $host_name )_db
-                        deleteFromVaultRequest $VAULT_URL/v1/database/config/${db_connection_name}
-
-                        #delete boundary access policy from vault
-                        db_policy_name=$( echo $host_name )_db_policy
-                        deleteFromVaultRequest $VAULT_URL/v1/sys/policies/acl/${db_policy_name}
-                      
-                    else
+                    if [[ $( echo $new_host_set_list | grep $diff_hs ) ]]; then
                         #newly created host-set in recent git-push 
 
                         #extract host-set config from yaml file 
@@ -277,6 +241,41 @@ jobs:
                         echo payload for target add 
                         cat add_cred_lib_to_target.json
                         curl --header "Authorization: Bearer ${token}" --request POST --data @add_cred_lib_to_target.json $BOUNDARY_URL/v1/targets/$target_id_trim:add-credential-sources
+                    else
+                        #deleted host-set in recent git-push
+
+                        host_set_name=$diff_hs
+                        host_name=$( echo "${diff_hs%_set}" )
+                        target_name="$( echo $host_name )_target"
+                        credential_store_name="$( echo $host_name )_cred_store"
+
+                        echo To delete $host_set_name $host_name $target_name
+
+                        #deleteEntityById(filename, entityType, entityDeleteEndpoint)
+
+                        #delete host
+                        deleteEntityById all_hosts.json $host_name "v1/hosts/" $token
+
+                        #delete host-set
+                        deleteEntityById all_host_sets.json $host_set_name "v1/host-sets/" $token
+                      
+                        #delete target 
+                        deleteEntityById all_targets.json $target_name "v1/targets/" $token
+
+                        #delete credential store
+                        deleteEntityById all_credential_stores.json $credential_store_name "v1/credential-stores/" $token
+
+                        #delete db_role from vault
+                        db_role_name=$( echo $host_name )_role
+                        deleteFromVaultRequest $VAULT_URL/v1/database/roles/${db_role_name}
+
+                        #delete db_connection from vault
+                        db_connection_name=$( echo $host_name )_db
+                        deleteFromVaultRequest $VAULT_URL/v1/database/config/${db_connection_name}
+
+                        #delete boundary access policy from vault
+                        db_policy_name=$( echo $host_name )_db_policy
+                        deleteFromVaultRequest $VAULT_URL/v1/sys/policies/acl/${db_policy_name}
                     fi
                     
                 done 
