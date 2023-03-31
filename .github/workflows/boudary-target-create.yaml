@@ -45,6 +45,7 @@ jobs:
               entity_id_to_del_trim="${entity_id_to_del%\"}"
               entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
               curl --header "Authorization: Bearer ${4}" --request DELETE $BOUNDARY_URL/$3$entity_id_to_del_trim
+              echo $3 used to delete $entity_id_to_del
             }
 
             #getRequest(token, endpoint)
@@ -139,21 +140,27 @@ jobs:
                         credential_store_name="$( echo $host_name )_cred_store"
                         echo To delete $host_set_name $host_name $target_name
                         #deleteEntityById(filename, entityType, entityDeleteEndpoint)
+                        
                         #delete host
                         deleteEntityById all_hosts.json $host_name "v1/hosts/" $token
+                        
                         #delete host-set
                         deleteEntityById all_host_sets.json $host_set_name "v1/host-sets/" $token
                       
                         #delete target 
                         deleteEntityById all_targets.json $target_name "v1/targets/" $token
+                        
                         #delete credential store
                         deleteEntityById all_credential_stores.json $credential_store_name "v1/credential-stores/" $token
+                        
                         #delete db_role from vault
                         db_role_name=$( echo $host_name )_role
                         deleteFromVaultRequest $VAULT_URL/v1/database/roles/${db_role_name}
+                        
                         #delete db_connection from vault
                         db_connection_name=$( echo $host_name )_db
                         deleteFromVaultRequest $VAULT_URL/v1/database/config/${db_connection_name}
+                        
                         #delete boundary access policy from vault
                         db_policy_name=$( echo $host_name )_db_policy
                         deleteFromVaultRequest $VAULT_URL/v1/sys/policies/acl/${db_policy_name}
@@ -162,11 +169,13 @@ jobs:
                         #newly created host-set in recent git-push 
                         #extract host-set config from yaml file 
                         hs=$diff_hs yq '.host-catalog.host-sets[] | select(.name==env(hs))' $val > data.yaml
+                        
                         #create host-set
                         host_set_name=$(yq ".name" data.yaml)
                         host_set_description=$(yq ".description" data.yaml)
                         echo "{\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_set_name}\",\"description\":\"${host_set_description}\"}" > new_host_set.json
                         host_set_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @new_host_set.json $BOUNDARY_URL/v1/host-sets | jq '.id' )
+                        
                         #create host
                         host_name=$(yq ".hosts.name" data.yaml)
                         host_description=$(yq ".hosts.description" data.yaml)
@@ -175,11 +184,13 @@ jobs:
                         host_password=$(yq ".hosts.password" data.yaml)
                         echo "{\"attributes\":{\"address\":\"${host_ip}\"},\"type\":\"static\",\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_name}\",\"description\":\"${host_description}\"}" > host.json
                         host_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host.json $BOUNDARY_URL/v1/hosts | jq '.id' )
+                        
                         #add host to host-set
                         echo "{\"version\":1,\"host_ids\":[${host_id}]}" > add_host_to_host_set.json
                         host_set_id_trim="${host_set_id%\"}"
                         host_set_id_trim="${host_set_id_trim#\"}"
                         curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_to_host_set.json $BOUNDARY_URL/v1/host-sets/$host_set_id_trim:add-hosts
+                        
                         #create target 
                         target_name=$(yq ".target.name" data.yaml)
                         target_description=$(yq ".target.description" data.yaml)
@@ -187,6 +198,7 @@ jobs:
                         echo "{\"attributes\":{\"default_port\":${target_default_port}},\"type\":\"tcp\",\"name\":\"${target_name}\",\"description\":\"${target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
                         cat target.json
                         target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json $BOUNDARY_URL/v1/targets | jq '.id' )
+                        
                         #add host-set in target
                         echo "{\"version\":1,\"host_source_ids\":[${host_set_id}]}" > add_host_set_to_target.json
                         target_id_trim="${target_id%\"}"
