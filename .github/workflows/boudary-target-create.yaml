@@ -129,7 +129,7 @@ jobs:
                 
                 echo Diff_host_Set after changing is $diff_host_set
                 echo New_host_Set iis $new_host_set_list
-                for diff_hs iin $diff_host_set
+                for diff_hs in $diff_host_set
                 do
                     if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
                         #deleted host-set in recent git-push
