@@ -54,7 +54,7 @@ jobs:
 
             #deleteFromVaultRequest(endpoint)
             deleteFromVaultRequest(){
-              curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN_2 }}" --request DELETE $1
+              curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE $1
             }
 
 
