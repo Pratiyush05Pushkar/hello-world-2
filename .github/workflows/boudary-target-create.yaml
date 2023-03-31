@@ -30,7 +30,7 @@ jobs:
       # Prints the changes when done / added - Git Actions does not run when file is removed ******
       - name: To upload targets 
         run: |
-            #Re triggered for 3 times , Increase this number by one when only this action is needed to be changed .
+            #Re triggered for 4 times , Increase this number by one when only this action is needed to be changed .
             #globally used constants
             readonly STAGE_PROJECT_ID="p_Jv4BjggzW9";
             readonly PROD_PROJECT_ID="p_HBZMfr6PcE";
