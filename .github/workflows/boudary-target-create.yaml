@@ -237,7 +237,7 @@ jobs:
                         elif [ $host_engine == "postgresql" ] ;then
 
                           echo Postgres db connection
-                          database_name=$(yq ".hosts.database_name" data.yaml)
+                          database_name=$(yq ".database_name" data.yaml)
                           echo "{\"backend\":\"database\",\"name\":\"${db_connection_name}\",\"plugin_name\":\"postgresql-database-plugin\",\"verify_connection\":true,\"connection_url\":\"postgresql://{{username}}:{{password}}@${host_ip}:${target_default_port}/${database_name}\",\"username\":\"${host_username}\",\"password\":\"${host_password}\",\"max_open_connections\":4,\"max_idle_connections\":0,\"max_connection_lifetime\":\"0s\"}" > db_connection_payload.json
                           curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_connection_payload.json $VAULT_URL/v1/database/config/$db_connection_name
 
