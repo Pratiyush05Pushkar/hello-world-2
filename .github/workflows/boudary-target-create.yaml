@@ -202,7 +202,8 @@ jobs:
 
                         #create target
                         target_name=$(yq ".name" data.yaml)_target
-                        target_description=$(yq ".description" data.yaml)
+                        target_description=""
+                        #$(yq ".description" data.yaml)
                         target_default_port=$(yq ".default_port" data.yaml)
                         echo "{\"attributes\":{\"default_port\":${target_default_port}},\"type\":\"tcp\",\"name\":\"${target_name}\",\"description\":\"${target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
                         cat target.json
