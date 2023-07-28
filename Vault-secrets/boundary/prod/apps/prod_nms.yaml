@@ -3,8 +3,8 @@ host-catalog:
           name: service_23_
           description: nms_servicederpton/optio
           hosts:
-              - name: nms_postgres_v1
-                description: descri st_name_2 /optional
+              - name: nms_postgres_v2
+                description: descri st_name /optional
                 address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                 database_name: sqlpad
                 username: livspace
