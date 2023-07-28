@@ -1,18 +1,13 @@
 project: stage
 host-catalog:
-          name: service_23_
-          description: nms_servicederpton/optio
-          host-sets:
-                - name: nms_staging_postgres_46_set
-                  description: descrmicroervice_2 /optional
-                  target:
-                      name: nms_staging_postgres_46_target
-                      description: dedee
-                      default_port: 5432
-                  hosts:
-                      name: nms_staging_postgres_46
-                      description: descri st_name_2 /optional
-                      address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
-                      database_name: sqlpad
-                      username: livspace
-                      password: LivspaceRandomInfra12345
+          name: nms
+          description: nms dbs
+          hosts:
+              - name: nms_staging_postgres_46
+                description: Database name = sqlpad
+                address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
+                database_name: sqlpad
+                username: livspace
+                password: LivspaceRandomInfra12345
+                default_port: 5432
+                db_engine: postgresql
