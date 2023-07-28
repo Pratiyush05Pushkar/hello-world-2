@@ -3,7 +3,7 @@ host-catalog:
           name: nms 2
           description: nms dbs
           hosts:
-              - name: nms_staging_postgres_v2
+              - name: nms_staging_postgres_v1
                 description: Database name = sqlpad
                 address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                 database_name: sqlpad

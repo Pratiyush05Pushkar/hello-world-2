@@ -101,7 +101,7 @@ jobs:
                 curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL"/v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
                 host_catalog_id=""
                 #$(jq -r --arg hc_name $host_catalog_name '.items[]? | select(.name==$hc_name) | .id' all_host_catalogs.json)
-                host_catalog_name_list=$(jq ".items[].name" data.json)
+                host_catalog_name_list=$(jq ".items[].name" all_host_catalogs.json)
 
                 #if host-catalog doesnot exists , we need to create it
 
