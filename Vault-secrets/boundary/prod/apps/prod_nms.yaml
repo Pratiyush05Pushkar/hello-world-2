@@ -1,7 +1,7 @@
 project: prod
 host-catalog:
           name: NMS
-          description: Notification Messaging service
+          description: Notification Messaging service 1
           hosts:
               - name: nms_postgres_v6
                 description: descri st_name /optional
