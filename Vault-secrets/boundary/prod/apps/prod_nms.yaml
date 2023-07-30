@@ -1,7 +1,7 @@
 project: prod
 host-catalog:
-          name: service_23_
-          description: nms_servicederpton/optio
+          name: NMS
+          description: Notification Messaging service
           hosts:
               - name: nms_postgres_v6
                 description: descri st_name /optional
