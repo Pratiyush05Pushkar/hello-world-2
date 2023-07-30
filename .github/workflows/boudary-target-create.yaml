@@ -71,13 +71,6 @@ jobs:
 
             only_git_action_update=false
             changed_files=${{ steps.changed-files-specific.outputs.all_changed_files }}
-            # if [[ $changed_files == ".github/workflows/boudary-target-create.yaml" ]];
-            # then
-            #     prod_files=$(find Vault-secrets/boundary/prod/apps -type f -name \*.yaml)
-            #     stage_files=$(find Vault-secrets/boundary/stage/apps -type f -name \*.yaml)
-            #     changed_files=$(echo $prod_files $stage_files)
-            #     only_git_action_update=true
-            # fi
 
             for val in $changed_files
             do
@@ -134,10 +127,6 @@ jobs:
                 echo Diff_host_Set is $diff_host_set
                 echo Host_Catalog_Id $host_catalog_id
 
-                # if [ "$only_git_action_update" == true ]; then
-                #     diff_host_set=$new_host_set_list
-                # fi
-
                 echo Diff_host_Set after changing is $diff_host_set
                 echo New_host_Set is $new_host_set_list
                 for diff_hs in $diff_host_set
@@ -185,7 +174,6 @@ jobs:
                     fi
                     if [[ $( echo $new_host_set_list | grep $diff_hs ) ]]; then
                         #newly created host-set in recent git-push
-                        #extract host-set config from yaml file
                         host="${diff_hs%_set}" yq '.host-catalog.hosts[] | select(.name==env(host))' $val > data.yaml
 
                         #create host-set
@@ -292,19 +280,10 @@ jobs:
                         echo "{\"name\":\"${read_db_policy}\",\"policy\":\"path \\\"database/creds/${db_credential_create_read_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"database/creds/${db_credential_create_write_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\"}" > vault_boundary_policy.json
                         curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_boundary_policy.json $VAULT_URL/v1/sys/policy/$read_db_policy
 
-                        # #Create WRITE policy for boundary to access role
-                        # echo "{\"name\":\"${db_policy}\",\"policy\":\"path \\\"database/creds/${db_credential_create_write_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\"}" > vault_boundary_policy.json
-                        # curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_boundary_policy.json $VAULT_URL/v1/sys/policy/$write_db_policy
-
                         #Generate vault token
                         echo "{ \"policies\": [\"${db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"5h\",\"renewable\": true }" > vault_db_token_payload.json
                         boundary_token=$(curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_db_token_payload.json $VAULT_URL/v1/auth/token/create | jq '.auth.client_token' )
                         echo Token to put in boundary $boundary_token
-
-                        # #Generate WRITE vault token
-                        # echo "{ \"policies\": [\"${write_db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"5h\",\"renewable\": true }" > vault_db_token_payload.json
-                        # boundary_write_token=$(curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_db_token_payload.json $VAULT_URL/v1/auth/token/create | jq '.auth.client_token' )
-                        # echo Token to put in boundary $boundary_write_token
 
                         #Create credential store in boundary
                         credential_store_name="$( echo $host_name )_cred_store"
