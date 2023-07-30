@@ -20,6 +20,19 @@ jobs:
           files: |
             Vault-secrets/boundary/prod/apps/**
             Vault-secrets/boundary/stage/apps/**
+      - name: Set Workflow Environment variables
+        id: env_var
+        run: |
+            echo "STAGE_PROJECT_ID=p_Jv4BjggzW9" >> "$GITHUB_ENV"
+            echo "PROD_PROJECT_ID=p_HBZMfr6PcE" >> "$GITHUB_ENV"
+            echo "AUTH_ID=ampw_sC1BbzThIj" >> "$GITHUB_ENV"
+            echo "BOUNDARY_URL=http://127.0.0.1:9200" >> "$GITHUB_ENV"
+            echo "VAULT_URL=http://127.0.0.1:8200" >> "$GITHUB_ENV"
+
+            echo "{\"command\":\"login\",\"type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
+            curl --request POST --data @payload.json $BOUNDARY_URL"/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
+            echo "TOKEN=$(jq -r '.attributes.token' response.json)" >> "$GITHUB_ENV"
+
       #      .github/workflows/boudary-target-create.yaml
       # - name: Run step if any file(s) in the Vault-secret folder change
       #   if: steps.changed-files-specific.outputs.any_changed == 'true'
@@ -30,13 +43,6 @@ jobs:
       # Prints the changes when done / added - Git Actions does not run when file is removed ******
       - name: To upload targets
         run: |
-            #globally used constants
-            readonly STAGE_PROJECT_ID="p_Jv4BjggzW9";
-            readonly PROD_PROJECT_ID="p_HBZMfr6PcE";
-            readonly AUTH_ID="ampw_sC1BbzThIj"
-            readonly BOUNDARY_URL="http://127.0.0.1:9200";
-            readonly VAULT_URL="http://127.0.0.1:8200";
-
             #genericMethods
 
             #deleteEntityById(filename, entityName, entityDeleteEndpoint, token)
@@ -46,7 +52,7 @@ jobs:
               entity_id_to_del=$(jq -r --arg entity_name $2 '.items[]? | select(.name==$entity_name) | .id' $1)
               entity_id_to_del_trim="${entity_id_to_del%\"}"
               entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
-              curl --header "Authorization: Bearer ${4}" --request DELETE $BOUNDARY_URL/$3$entity_id_to_del_trim > response_on_del.json
+              curl --header "Authorization: Bearer ${4}" --request DELETE ${{ env.BOUNDARY_URL }}/$3$entity_id_to_del_trim > response_on_del.json
               echo $3 used to delete $entity_id_to_del
               echo Message is being displayed
               cat response_on_del.json
@@ -62,16 +68,7 @@ jobs:
               curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE $1
             }
 
-
-            echo "{\"command\":\"login\",\"type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
-            curl --request POST --data @payload.json $BOUNDARY_URL"/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
-            token=$(jq -r '.attributes.token' response.json)
-            echo $token
-
-            only_git_action_update=false
-            changed_files=${{ steps.changed-files-specific.outputs.all_changed_files }}
-
-            for val in $changed_files
+            for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
             do
                 #get project id
                 project_name=$(yq ".project" $val)
@@ -79,10 +76,10 @@ jobs:
                 if [[ $val == *"/stage/"* ]] ;
                 then
                   echo STAGING $val
-                  project_id=$STAGE_PROJECT_ID
+                  project_id=${{ env.STAGE_PROJECT_ID }}
                 else
                   echo PROD $val
-                  project_id=$PROD_PROJECT_ID
+                  project_id=${{ env.PROD_PROJECT_ID }}
                 fi
 
                 #read host-catalog from yaml file
@@ -90,29 +87,27 @@ jobs:
                 host_catalog_description=$(yq ".host-catalog.description" $val)
 
                 #get host-catalog list
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL"/v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
+                curl --header "Authorization: Bearer ${{ env.TOKEN }}" --request GET ${{ env.BOUNDARY_URL }}"/v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
                 host_catalog_id=""
                 #$(jq -r --arg hc_name $host_catalog_name '.items[]? | select(.name==$hc_name) | .id' all_host_catalogs.json)
                 host_catalog_name_list=$(jq ".items[].name" all_host_catalogs.json)
-
-                #if host-catalog doesnot exists , we need to create it
 
                 if [[ $( echo $host_catalog_name_list | grep $host_catalog_name ) ]]; then
                   host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[]? | select(.name==$hc_name) | .id' all_host_catalogs.json)
                 else
                   echo Near to create Host_catalog_id $host_catalog_id
                   echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
-                  host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json $BOUNDARY_URL/v1/host-catalogs | jq '.id' )
+                  host_catalog_id=$(curl --header "Authorization: Bearer ${{ env.TOKEN }}" --request POST --data @host_catalog.json ${{ env.BOUNDARY_URL }}/v1/host-catalogs | jq '.id' )
                   host_catalog_id_trim="${host_catalog_id%\"}"
                   host_catalog_id="${host_catalog_id_trim#\"}"
                   rm -f host_catalog.json
                 fi
 
                 #get host-sets , hosts , targets and credential stores which are already present
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/targets?scope_id=$project_id > all_targets.json
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
+                curl --header "Authorization: Bearer ${{ env.TOKEN }}" --request GET ${{ env.BOUNDARY_URL }}/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
+                curl --header "Authorization: Bearer ${{ env.TOKEN }}" --request GET ${{ env.BOUNDARY_URL }}/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
+                curl --header "Authorization: Bearer ${{ env.TOKEN }}" --request GET ${{ env.BOUNDARY_URL }}/v1/targets?scope_id=$project_id > all_targets.json
+                curl --header "Authorization: Bearer ${{ env.TOKEN }}" --request GET ${{ env.BOUNDARY_URL }}/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
 
                 #host-sets already present in Boundary
                 old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
@@ -144,32 +139,32 @@ jobs:
                         deleteEntityById all_hosts.json $host_name "v1/hosts/" $token
 
                         #delete host-set
-                        deleteEntityById all_host_sets.json $host_set_name "v1/host-sets/" $token
+                        deleteEntityById all_host_sets.json $host_set_name "v1/host-sets/" ${{ env.TOKEN }}
 
                         #delete read only target
-                        deleteEntityById all_targets.json $read_target_name "v1/targets/" $token
+                        deleteEntityById all_targets.json $read_target_name "v1/targets/" ${{ env.TOKEN }}
 
                         #delete write target
-                        deleteEntityById all_targets.json $write_target_name "v1/targets/" $token
+                        deleteEntityById all_targets.json $write_target_name "v1/targets/" ${{ env.TOKEN }}
 
                         #delete credential store
-                        deleteEntityById all_credential_stores.json $credential_store_name "v1/credential-stores/" $token
+                        deleteEntityById all_credential_stores.json $credential_store_name "v1/credential-stores/" ${{ env.TOKEN }}
 
                         #delete read only db_role from vault
                         read_db_role_name=$( echo $host_name )_read_role
-                        deleteFromVaultRequest $VAULT_URL/v1/database/roles/${read_db_role_name}
+                        deleteFromVaultRequest ${{ env.VAULT_URL }}/v1/database/roles/${read_db_role_name}
 
                         #delete write db_role from vault
                         write_db_role_name=$( echo $host_name )_write_role
-                        deleteFromVaultRequest $VAULT_URL/v1/database/roles/${write_db_role_name}
+                        deleteFromVaultRequest ${{ env.VAULT_URL }}/v1/database/roles/${write_db_role_name}
 
                         #delete db_connection from vault
                         db_connection_name=$( echo $host_name )_db
-                        deleteFromVaultRequest $VAULT_URL/v1/database/config/${db_connection_name}
+                        deleteFromVaultRequest ${{ env.VAULT_URL }}/v1/database/config/${db_connection_name}
 
                         #delete boundary access policy from vault
                         db_policy_name=$( echo $host_name )_db_policy
-                        deleteFromVaultRequest $VAULT_URL/v1/sys/policies/acl/${db_policy_name}
+                        deleteFromVaultRequest ${{ env.VAULT_URL }}/v1/sys/policies/acl/${db_policy_name}
                     fi
                     if [[ $( echo $new_host_set_list | grep $diff_hs ) ]]; then
                         #newly created host-set in recent git-push
