@@ -23,21 +23,23 @@ jobs:
       - name: Set Environment variables
         id: env_var
         run: |
-            echo "STAGE_PROJECT_ID=p_Jv4BjggzW9" >> "$GITHUB_ENV"
-            echo "PROD_PROJECT_ID=p_HBZMfr6PcE" >> "$GITHUB_ENV"
-            echo "AUTH_ID=ampw_sC1BbzThIj" >> "$GITHUB_ENV"
-            echo "BOUNDARY_URL=http://127.0.0.1:9200" >> "$GITHUB_ENV"
-            echo "VAULT_URL=http://127.0.0.1:8200" >> "$GITHUB_ENV"
+            echo "action_state=yellow" >> "$GITHUB_ENV"
 
-            echo "{\"command\":\"login\",\"type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
-            curl --request POST --data @payload.json $BOUNDARY_URL"/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
-            echo "TOKEN=$(jq -r '.attributes.token' response.json)" >> "$GITHUB_ENV"
+            # echo "STAGE_PROJECT_ID=p_Jv4BjggzW9" >> "$GITHUB_ENV"
+            # echo "PROD_PROJECT_ID=p_HBZMfr6PcE" >> "$GITHUB_ENV"
+            # echo "AUTH_ID=ampw_sC1BbzThIj" >> "$GITHUB_ENV"
+            # echo "BOUNDARY_URL=http://127.0.0.1:9200" >> "$GITHUB_ENV"
+            # echo "VAULT_URL=http://127.0.0.1:8200" >> "$GITHUB_ENV"
 
-            #get host-catalog list
-            curl --header "Authorization: Bearer ${{ env.TOKEN }}" --request GET ${{ env.BOUNDARY_URL }}"/v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
-            host_catalog_id=""
-            #$(jq -r --arg hc_name $host_catalog_name '.items[]? | select(.name==$hc_name) | .id' all_host_catalogs.json)
-            echo "host_catalog_name_list=$(jq ".items[].name" all_host_catalogs.json)" >> "$GITHUB_ENV"
+            # echo "{\"command\":\"login\",\"type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
+            # curl --request POST --data @payload.json $BOUNDARY_URL"/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
+            # echo "TOKEN=$(jq -r '.attributes.token' response.json)" >> "$GITHUB_ENV"
+
+            # #get host-catalog list
+            # curl --header "Authorization: Bearer ${{ env.TOKEN }}" --request GET ${{ env.BOUNDARY_URL }}"/v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
+            # host_catalog_id=""
+            # #$(jq -r --arg hc_name $host_catalog_name '.items[]? | select(.name==$hc_name) | .id' all_host_catalogs.json)
+            # echo "host_catalog_name_list=$(jq ".items[].name" all_host_catalogs.json)" >> "$GITHUB_ENV"
       - name: To upload targets
         run: |
             #globally used constants
