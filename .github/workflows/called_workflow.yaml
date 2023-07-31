@@ -1,0 +1,27 @@
+name: Vault-token create
+
+on:
+  workflow_call:
+    inputs:
+      config-path:
+        required: false
+        type: string
+    secrets:
+      token:
+        required: false
+
+
+jobs:
+  build:
+    runs-on: self-hosted
+    name: Replace vault token with new one
+    steps:
+      - name: Echo the data file
+        run: |
+            cat target.json
+
+
+
+
+
+
