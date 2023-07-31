@@ -38,16 +38,6 @@ jobs:
             host_catalog_id=""
             #$(jq -r --arg hc_name $host_catalog_name '.items[]? | select(.name==$hc_name) | .id' all_host_catalogs.json)
             echo "host_catalog_name_list=$(jq ".items[].name" all_host_catalogs.json)" >> "$GITHUB_ENV"
-
-
-      #      .github/workflows/boudary-target-create.yaml
-      # - name: Run step if any file(s) in the Vault-secret folder change
-      #   if: steps.changed-files-specific.outputs.any_changed == 'true'
-      #   run: |
-      #     for file in ${{ steps.changed-files-specific.outputs.all_changed_files }} ; do
-      #       yq -o=json $file
-      #     done
-      # Prints the changes when done / added - Git Actions does not run when file is removed ******
       - name: To upload targets
         run: |
             #globally used constants
