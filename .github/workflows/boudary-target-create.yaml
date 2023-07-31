@@ -24,10 +24,10 @@ jobs:
         id: env_var
         run: |
             echo "STAGE_PROJECT_ID=p_Jv4BjggzW9" >> "$GITHUB_ENV"
-            # echo "PROD_PROJECT_ID=p_HBZMfr6PcE" >> "$GITHUB_ENV"
-            # echo "AUTH_ID=ampw_sC1BbzThIj" >> "$GITHUB_ENV"
-            # echo "BOUNDARY_URL=http://127.0.0.1:9200" >> "$GITHUB_ENV"
-            # echo "VAULT_URL=http://127.0.0.1:8200" >> "$GITHUB_ENV"
+            echo "PROD_PROJECT_ID=p_HBZMfr6PcE" >> "$GITHUB_ENV"
+            echo "AUTH_ID=ampw_sC1BbzThIj" >> "$GITHUB_ENV"
+            echo "BOUNDARY_URL=http://127.0.0.1:9200" >> "$GITHUB_ENV"
+            echo "VAULT_URL=http://127.0.0.1:8200" >> "$GITHUB_ENV"
 
             # echo "{\"command\":\"login\",\"type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
             # curl --request POST --data @payload.json $BOUNDARY_URL"/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
