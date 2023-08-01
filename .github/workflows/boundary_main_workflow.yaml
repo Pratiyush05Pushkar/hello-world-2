@@ -144,7 +144,7 @@ jobs:
 
                         v_d_p=$( echo $host_name )_db_policy
 
-                        yq -i '.items += {"host_id":\"$host_id\","host_set_id":\"$host_set_id\","target_id":\"$target_id\","cred_store_id":\"$cred_store_id\","vault_db_role":\"$v_d_r\","vault_db_donfig":\"$v_d_c\","vault_db_policy":\"$v_d_p\"}' delete_entities.yaml
+                        hID=$host_id hsID=$host_set_id tID=$target_id cID=$cred_store_id vDR=$v_d_r vDC=$v_d_c vDP=$v_d_p yq -i '.items += {"host_id":strenv(hID),"host_set_id":strenv(hsID),"target_id":strenv(tID),"cred_store_id":strenv(cID),"vault_db_role":strenv(vDR),"vault_db_donfig":strenv(vDC),"vault_db_policy":strenv(vDP)}' delete_entities.yaml
 
                         echo Deleting
                         cat delete_entities.yaml
@@ -154,7 +154,7 @@ jobs:
                         #extract host config from yaml file
                         hs=$diff_hs yq '.host-catalog.hosts[] | select(.name==env(hs))' $val > data.yaml
 
-                        yq -i '.items += {\"project_id\":\"$project_id\",\"host_catalog_id\":\"$host_catalog_id\",\"host\":load("data.yaml")}' create_entities.yaml
+                        pID=$project_id hcID=$host_catalog_id yq -i '.items += {"project_id":strenv(pID),"host_catalog_id":strenv(hcID),"host":load("data.yaml")}' create_entities.yaml
 
                         echo Create
                         cat create_entities.yaml
