@@ -31,7 +31,7 @@ jobs:
             readonly VAULT_URL="http://127.0.0.1:8200";
 
 
-            #generic methods
+            #generic methodss
             entityId=""
             getEntityId(){
               entity_id_to_del=$(jq -r --arg entity_name $2 '.items[] | select(.name==$entity_name) | .id' $1)
