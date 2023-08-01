@@ -21,6 +21,7 @@ jobs:
             Vault-secrets/boundary/prod/apps/**
             Vault-secrets/boundary/stage/apps/**
       - name: Create data file
+        id: main_workflow
         run: |
             #globally used constants
             readonly STAGE_PROJECT_ID="p_Jv4BjggzW9";
@@ -123,8 +124,10 @@ jobs:
 
                 done
             done
+    outputs:
+        BOUNDARY_TOKEN: ${{ steps.main_workflow.outputs.BOUNDARY_TOKEN }}
   call-workflow-passing-data:
-    needs: [ build , "${{ needs.build.outputs.BOUNDARY_TOKEN }}" ]
+    needs: build
     uses: ./.github/workflows/delete_entities_boundary.yaml
     with:
       BOUNDARY_URL: "http://127.0.0.1:9200"
