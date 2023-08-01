@@ -50,84 +50,84 @@ jobs:
             echo "BOUNDARY_TOKEN=$( echo $token )" >> "$GITHUB_OUTPUT"
 
 
-            # for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
-            # do
-            #     #get project id
-            #     project_name=$(yq ".project" $val)
-            #     project_id=""
-            #     if [ $project_name == "stage" ] ;
-            #     then
-            #       project_id=$STAGE_PROJECT_ID
-            #     else
-            #       project_id=$PROD_PROJECT_ID
-            #     fi
-            #     #read host-catalog from yaml file
-            #     host_catalog_name=$(yq ".host-catalog.name" $val)
-            #     host_catalog_description=$(yq ".host-catalog.description" $val)
+            for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
+            do
+                #get project id
+                project_name=$(yq ".project" $val)
+                project_id=""
+                if [ $project_name == "stage" ] ;
+                then
+                  project_id=$STAGE_PROJECT_ID
+                else
+                  project_id=$PROD_PROJECT_ID
+                fi
+                #read host-catalog from yaml file
+                host_catalog_name=$(yq ".host-catalog.name" $val)
+                host_catalog_description=$(yq ".host-catalog.description" $val)
 
-            #     #get host-catalog list
-            #     curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
-            #     host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
+                #get host-catalog list
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
+                host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
 
-            #     #if host-catalog doesnot exists , we need to create it
-            #     if [ -z "$host_catalog_id" ] ;
-            #     then
-            #       echo Host_catalog_id $host_catalog_id
-            #       echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
-            #       host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json $BOUNDARY_URL/v1/host-catalogs | jq '.id' )
-            #       rm -f host_catalog.json
-            #     fi
+                #if host-catalog doesnot exists , we need to create it
+                if [ -z "$host_catalog_id" ] ;
+                then
+                  echo Host_catalog_id $host_catalog_id
+                  echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
+                  host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json $BOUNDARY_URL/v1/host-catalogs | jq '.id' )
+                  rm -f host_catalog.json
+                fi
 
-            #     #get host-sets , hosts , targets and credential stores which are already present
-            #     curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
-            #     curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
-            #     curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/targets?scope_id=$project_id > all_targets.json
-            #     curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
-            #     #host-sets already present in Boudary
-            #     old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
+                #get host-sets , hosts , targets and credential stores which are already present
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/targets?scope_id=$project_id > all_targets.json
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
+                #host-sets already present in Boudary
+                old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
 
-            #     #host-sets in recent yaml file
-            #     new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
-            #     #diff gets us deleted host-sets and newly created host-sets
-            #     diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
+                #host-sets in recent yaml file
+                new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
+                #diff gets us deleted host-sets and newly created host-sets
+                diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
 
-            #     echo "items:" > delete_entities.yaml
-            #     echo "items:" > create_entities.yaml
+                echo "items:" > delete_entities.yaml
+                echo "items:" > create_entities.yaml
 
-            #     for diff_hs in $diff_host_set
-            #     do
-            #         if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
+                for diff_hs in $diff_host_set
+                do
+                    if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
 
-            #             #get host_id
-            #             getEntityId all_hosts.json $host_name
-            #             host_id=entityId
+                        #get host_id
+                        getEntityId all_hosts.json $host_name
+                        host_id=entityId
 
-            #             #get host_set_id
-            #             host_set_name="$( echo $host_name )_set"
-            #             getEntityId all_host_sets.json $host_set_name
-            #             host_set_id=entityId
+                        #get host_set_id
+                        host_set_name="$( echo $host_name )_set"
+                        getEntityId all_host_sets.json $host_set_name
+                        host_set_id=entityId
 
-            #             #get target_id
-            #             target_name="$( echo $host_name )_target"
-            #             getEntityId all_targets.json $target_name
-            #             target_id=entityId
+                        #get target_id
+                        target_name="$( echo $host_name )_target"
+                        getEntityId all_targets.json $target_name
+                        target_id=entityId
 
-            #             #get credential_store_id
-            #             cred_store_name="$( echo $host_name )_cred_store"
-            #             getEntityId all_credential_stores.json $cred_store_name
-            #             cred_store_id=entityId
+                        #get credential_store_id
+                        cred_store_name="$( echo $host_name )_cred_store"
+                        getEntityId all_credential_stores.json $cred_store_name
+                        cred_store_id=entityId
 
-            #             v_d_r=$( echo $host_name )_role
+                        v_d_r=$( echo $host_name )_role
 
-            #             v_d_c=$( echo $host_name )_db
+                        v_d_c=$( echo $host_name )_db
 
-            #             v_d_p=$( echo $host_name )_db_policy
+                        v_d_p=$( echo $host_name )_db_policy
 
-            #             yq -i ".items += ["host_id":\"$host_id\","host_set_id":\"$host_set_id\","target_id":\"$target_id\","cred_store_id":\"$cred_store_id\","vault_db_role":\"$v_d_r\","vault_db_donfig":\"$v_d_c\","vault_db_policy":\"$v_d_p\",]" delete_entities.yaml
-            #         fi
+                        yq -i ".items += ["host_id":\"$host_id\","host_set_id":\"$host_set_id\","target_id":\"$target_id\","cred_store_id":\"$cred_store_id\","vault_db_role":\"$v_d_r\","vault_db_donfig":\"$v_d_c\","vault_db_policy":\"$v_d_p\",]" delete_entities.yaml
+                    fi
 
-            #     done
-            # done
+                done
+            done
   call-workflow-passing-data:
     needs: build
     uses: ./.github/workflows/delete_entities_boundary.yaml

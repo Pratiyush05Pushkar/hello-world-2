@@ -3,7 +3,7 @@ host-catalog:
           name: NMS
           description: Notification Messaging service 1
           hosts:
-              - name: nms_postgres_v7
+              - name: nms_postgres_v1
                 description: descri st_name /optional
                 address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                 database_name: sqlpad
