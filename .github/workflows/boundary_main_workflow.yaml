@@ -43,7 +43,7 @@ jobs:
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
             curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
             token=$(jq -r '.attributes.token' response.json)
-            echo "TOKEN=$token" >> "$GITHUB_ENV"
+            echo "BOUNDARY_TOKEN=$token" >> "$GITHUB_ENV"
 
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
             do
@@ -130,7 +130,7 @@ jobs:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
     secrets:
-      token: ${{ env.TOKEN }}
+      token: ${{ env.BOUNDARY_TOKEN }}
 
 
 
