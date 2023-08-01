@@ -107,10 +107,11 @@ jobs:
                 old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
 
                 #host-sets in recent yaml file
-                new_host_set_list=$(yq ".host-catalog.host-sets[].name" $val)
+                new_host_set_list=$(yq ".host-catalog.host[].name" $val)_set
                 #diff gets us deleted host-sets and newly created host-sets
                 diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
 
+                echo $diff_host_set
                 echo "items:" > delete_entities.yaml
                 echo "items:" > create_entities.yaml
 
