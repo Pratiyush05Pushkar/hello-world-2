@@ -123,6 +123,8 @@ jobs:
 
                 done
             done
+        outputs:
+          BOUNDARY_TOKEN: ${{ env.BOUNDARY_TOKEN }}
   call-workflow-passing-data:
     needs: build
     uses: ./.github/workflows/delete_entities_boundary.yaml
@@ -130,7 +132,7 @@ jobs:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
     secrets:
-      token: ${{ env.BOUNDARY_TOKEN }}
+      token: ${{ needs.build.outputs.BOUNDARY_TOKEN }}
 
 
 
