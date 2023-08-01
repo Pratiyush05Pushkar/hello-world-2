@@ -41,8 +41,8 @@ jobs:
             }
 
 
-            echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
-            curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
+            echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
+            curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${AUTH_ID}:authenticate > response.json
             token=$(jq -r '.attributes.token' response.json)
             echo "BOUNDARY_TOKEN=$token" >> "$GITHUB_OUTPUT"
 
