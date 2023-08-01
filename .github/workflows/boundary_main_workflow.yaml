@@ -45,7 +45,7 @@ jobs:
             curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${AUTH_ID}:authenticate > response.json
             token=$(jq -r '.attributes.token' response.json)
             echo $token
-            echo "BOUNDARY_TOKEN=$token" >> "$GITHUB_OUTPUT"
+            echo "BOUNDARY_TOKEN=$( echo $token )" >> "$GITHUB_OUTPUT"
             echo "Saved Ouptut"
 
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
