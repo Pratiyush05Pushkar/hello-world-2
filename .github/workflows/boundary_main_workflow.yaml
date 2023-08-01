@@ -61,7 +61,7 @@ jobs:
               entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
               entityId=entity_id_to_del_trim
             }
-
+            echo $token
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
             do
                 #get project id
