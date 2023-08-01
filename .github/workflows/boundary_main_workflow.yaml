@@ -43,7 +43,7 @@ jobs:
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD }}\"}}" > payload.json
             curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${AUTH_ID}:authenticate" > response.json
             token=$(jq -r '.attributes.token' response.json)
-            echo "BOUNDARY_TOKEN=$token" >> "$GITHUB_ENV"
+            echo "BOUNDARY_TOKEN=$token" >> "$GITHUB_OUTPUT"
 
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
             do
@@ -123,8 +123,6 @@ jobs:
 
                 done
             done
-        outputs:
-          BOUNDARY_TOKEN: ${{ env.BOUNDARY_TOKEN }}
   call-workflow-passing-data:
     needs: [ build , "${{ needs.build.outputs.BOUNDARY_TOKEN }}" ]
     uses: ./.github/workflows/delete_entities_boundary.yaml
