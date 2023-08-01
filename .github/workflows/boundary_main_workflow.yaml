@@ -98,10 +98,10 @@ jobs:
                 curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/targets?scope_id=$project_id > all_targets.json
                 curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
 
-                cat all_host_sets.json
-                cat all_hosts.json
-                cat all_targets.json
-                cat all_credential_stores.json
+                # cat all_host_sets.json
+                # cat all_hosts.json
+                # cat all_targets.json
+                # cat all_credential_stores.json
 
                 #host-sets already present in Boundary
                 old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
@@ -118,7 +118,7 @@ jobs:
                 for diff_hs in $diff_host_set
                 do
                     if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
-
+                        echo INside deleting
                         #get host_id
                         getEntityId all_hosts.json $host_name
                         host_id=entityId
@@ -149,6 +149,7 @@ jobs:
                         echo Deleting
                         cat delete_entities.yaml
                     else
+                        echo INside creating
                         #create entity array
                         #extract host config from yaml file
                         hs=$diff_hs yq '.host-catalog.hosts[] | select(.name==env(hs))' $val > data.yaml
