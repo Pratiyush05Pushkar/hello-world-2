@@ -1,0 +1,32 @@
+name: Create entities in Boundary
+
+on:
+  workflow_call:
+    inputs:
+      BOUNDARY_URL:
+        required: true
+        type: string
+      VAULT_URL:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+
+jobs:
+  build:
+    runs-on: self-hosted
+    name: Create entities in Boundary
+    steps:
+      - name: Echo the data file
+        run: |
+            for create_entity in $( yq ".items" create_entities.yaml)
+            do
+                  echo $create_entity
+            done
+
+
+
+
+

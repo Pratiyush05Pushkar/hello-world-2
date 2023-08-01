@@ -4,7 +4,7 @@ run-name: Main Boundary workflow
 on: push
 
 jobs:
-  build:
+  build_script:
     runs-on: self-hosted
     name: Main worlflow
     outputs:
@@ -22,6 +22,25 @@ jobs:
           files: |
             Vault-secrets/boundary/prod/apps/**
             Vault-secrets/boundary/stage/apps/**
+      - name: Set Boundary login tokens
+        id: set_outputs
+        run: |
+            readonly ENG_AUTH_ID="ampw_sC1BbzThIj"
+            readonly BUS_AUTH_ID="XXX"
+            readonly BOUNDARY_URL="http://127.0.0.1:9200";
+
+            echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
+            curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${ENG_AUTH_ID}:authenticate > response.json
+            token=$(jq -r '.attributes.token' response.json)
+            echo $token
+            echo "ENGINEERING_BOUNDARY_TOKEN=$( echo $token )" >> "$GITHUB_OUTPUT"
+
+            # echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
+            # curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${BUS_AUTH_ID}:authenticate > response.json
+            # token=$(jq -r '.attributes.token' response.json)
+            # echo $token
+            # echo "BUSINESS_BOUNDARY_TOKEN=$( echo $token )" >> "$GITHUB_OUTPUT"
+
       - name: Create data file
         id: main_workflow
         run: |
@@ -32,8 +51,9 @@ jobs:
             readonly BOUNDARY_URL="http://127.0.0.1:9200";
             readonly VAULT_URL="http://127.0.0.1:8200";
 
+            token=${{ steps.set_outputs.outputs.ENGINEERING_BOUNDARY_TOKEN }}
 
-            #generic methodss
+            #get Entity Id in Boundary
             entityId=""
             getEntityId(){
               entity_id_to_del=$(jq -r --arg entity_name $2 '.items[] | select(.name==$entity_name) | .id' $1)
@@ -41,14 +61,6 @@ jobs:
               entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
               entityId=entity_id_to_del_trim
             }
-
-
-            echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
-            curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${AUTH_ID}:authenticate > response.json
-            token=$(jq -r '.attributes.token' response.json)
-            echo $token
-            echo "BOUNDARY_TOKEN=$( echo $token )" >> "$GITHUB_OUTPUT"
-
 
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
             do
@@ -66,7 +78,7 @@ jobs:
                 host_catalog_description=$(yq ".host-catalog.description" $val)
 
                 #get host-catalog list
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-catalogs?scope_id="$project_id > all_host_catalogs.json
+                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
                 host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
 
                 #if host-catalog doesnot exists , we need to create it
@@ -83,7 +95,8 @@ jobs:
                 curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
                 curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/targets?scope_id=$project_id > all_targets.json
                 curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
-                #host-sets already present in Boudary
+
+                #host-sets already present in Boundary
                 old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
 
                 #host-sets in recent yaml file
@@ -123,14 +136,29 @@ jobs:
 
                         v_d_p=$( echo $host_name )_db_policy
 
-                        yq -i ".items += ["host_id":\"$host_id\","host_set_id":\"$host_set_id\","target_id":\"$target_id\","cred_store_id":\"$cred_store_id\","vault_db_role":\"$v_d_r\","vault_db_donfig":\"$v_d_c\","vault_db_policy":\"$v_d_p\",]" delete_entities.yaml
+                        yq -i ".items += {"host_id":\"$host_id\","host_set_id":\"$host_set_id\","target_id":\"$target_id\","cred_store_id":\"$cred_store_id\","vault_db_role":\"$v_d_r\","vault_db_donfig":\"$v_d_c\","vault_db_policy":\"$v_d_p\"}" delete_entities.yaml
+                    else
+                        #create entity array
+                        #extract host config from yaml file
+                        hs=$diff_hs yq '.host-catalog.hosts[] | select(.name==env(hs))' $val > data.yaml
+
+                        yq -i ".items += {"project_id":\"$project_id\","host_catalog_id":\"$host_catalog_id\","host":load("data.yaml")"}" create_entities.yaml
+
                     fi
 
                 done
             done
-  call-workflow-passing-data:
-    needs: build
+  call-delete-workflow:
+    needs: build_script
     uses: ./.github/workflows/delete_entities_boundary.yaml
+    with:
+      BOUNDARY_URL: "http://127.0.0.1:9200"
+      VAULT_URL: "http://127.0.0.1:8200"
+    secrets:
+      token: ${{ needs.build.outputs.BOUNDARY_TOKEN }}
+  call-create-workflow:
+    needs: call-delete-workflow
+    uses: ./.github/workflows/create_entities_boundary.yaml
     with:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
