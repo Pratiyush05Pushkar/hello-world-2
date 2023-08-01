@@ -64,6 +64,7 @@ jobs:
 
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
             do
+                echo $val
                 #get project id
                 project_name=$(yq ".project" $val)
                 project_id=""
@@ -166,7 +167,7 @@ jobs:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
     secrets:
-      token: ${{ needs.build_script.outputs.BOUNDARY_TOKEN }}
+      token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
   call-create-workflow:
     needs: call-delete-workflow
     uses: ./.github/workflows/create_entities_boundary.yaml
@@ -174,7 +175,7 @@ jobs:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
     secrets:
-      token: ${{ needs.build_script.outputs.BOUNDARY_TOKEN }}
+      token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
 
 
 
