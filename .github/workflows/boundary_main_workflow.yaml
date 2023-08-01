@@ -123,16 +123,19 @@ jobs:
                         getEntityId all_hosts.json $host_name
                         host_id=entityId
 
+                        echo Stage 1
                         #get host_set_id
                         host_set_name="$( echo $host_name )_set"
                         getEntityId all_host_sets.json $host_set_name
                         host_set_id=entityId
 
+                        echo Stage 2
                         #get target_id
                         target_name="$( echo $host_name )_target"
                         getEntityId all_targets.json $target_name
                         target_id=entityId
 
+                        echo Stage 3
                         #get credential_store_id
                         cred_store_name="$( echo $host_name )_cred_store"
                         getEntityId all_credential_stores.json $cred_store_name
@@ -152,7 +155,7 @@ jobs:
                         echo INside creating
                         #create entity array
                         #extract host config from yaml file
-                        hs=$diff_hs yq '.host-catalog.hosts[] | select(.name==env(hs))' $val > data.yaml
+                        hs="${diff_hs%_set}" yq '.host-catalog.hosts[] | select(.name==env(hs))' $val > data.yaml
 
                         pID=$project_id hcID=$host_catalog_id yq -i '.items += {"project_id":strenv(pID),"host_catalog_id":strenv(hcID),"host":load("data.yaml")}' create_entities.yaml
 
