@@ -26,16 +26,16 @@ jobs:
                   echo $del_entity
 
                   #delete host
-                  curl --header "Authorization: Bearer ${ secrets.token }" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/hosts/$( yq ".host_id" del_entity)
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/hosts/$( yq ".host_id" del_entity)
 
                   #delete host-set
-                  curl --header "Authorization: Bearer ${ secrets.token }" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/host-sets/$( yq ".host_set_id" del_entity)
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/host-sets/$( yq ".host_set_id" del_entity)
 
                   #delete target
-                  curl --header "Authorization: Bearer ${ secrets.token }" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/targets/$( yq ".target_id" del_entity)
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/targets/$( yq ".target_id" del_entity)
 
                   #delete credential store
-                  curl --header "Authorization: Bearer ${ secrets.token }" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/credential-stores/$( yq ".cred_store_id" del_entity)
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/credential-stores/$( yq ".cred_store_id" del_entity)
 
                   #delete db_role from vault
                   curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE ${{ inputs.VAULT_URL }}/v1/database/roles/$( yq ".vault_db_role" del_entity)

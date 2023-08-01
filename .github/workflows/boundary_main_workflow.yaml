@@ -122,25 +122,25 @@ jobs:
                         #get host_id
                         host_name="${diff_hs%_set}"
                         getEntityId all_hosts.json $host_name
-                        host_id=entityId
+                        host_id=$entityId
 
                         echo Stage 1
                         #get host_set_id
                         host_set_name="$( echo $host_name )_set"
                         getEntityId all_host_sets.json $host_set_name
-                        host_set_id=entityId
+                        host_set_id=$entityId
 
                         echo Stage 2
                         #get target_id
                         target_name="$( echo $host_name )_target"
                         getEntityId all_targets.json $target_name
-                        target_id=entityId
+                        target_id=$entityId
 
                         echo Stage 3
                         #get credential_store_id
                         cred_store_name="$( echo $host_name )_cred_store"
                         getEntityId all_credential_stores.json $cred_store_name
-                        cred_store_id=entityId
+                        cred_store_id=$entityId
 
                         v_d_r=$( echo $host_name )_role
 
