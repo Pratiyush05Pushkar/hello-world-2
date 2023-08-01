@@ -91,6 +91,7 @@ jobs:
                   rm -f host_catalog.json
                 fi
 
+                echo $host_catalog_id
                 #get host-sets , hosts , targets and credential stores which are already present
                 curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
                 curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
