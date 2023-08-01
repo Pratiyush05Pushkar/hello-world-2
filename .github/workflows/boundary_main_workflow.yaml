@@ -107,7 +107,7 @@ jobs:
                 old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
 
                 #host-sets in recent yaml file
-                new_host_set_list=$(yq ".host-catalog.hosts[].name" $val)_set
+                new_host_set_list=$(yq '.host-catalog.hosts[].name | . + "_set"' $val)
                 #diff gets us deleted host-sets and newly created host-sets
                 diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
 
@@ -154,7 +154,7 @@ jobs:
                         #extract host config from yaml file
                         hs=$diff_hs yq '.host-catalog.hosts[] | select(.name==env(hs))' $val > data.yaml
 
-                        yq -i '.items += {"project_id":\"$project_id\","host_catalog_id":\"$host_catalog_id\","host":load("data.yaml")}' create_entities.yaml
+                        yq -i '.items += {\"project_id\":\"$project_id\",\"host_catalog_id\":\"$host_catalog_id\",\"host\":load("data.yaml")}' create_entities.yaml
 
                         echo Create
                         cat create_entities.yaml
