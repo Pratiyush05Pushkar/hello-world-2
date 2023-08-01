@@ -120,6 +120,7 @@ jobs:
                     if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
                         echo INside deleting
                         #get host_id
+                        host_name="${diff_hs%_set}"
                         getEntityId all_hosts.json $host_name
                         host_id=entityId
 
@@ -155,7 +156,7 @@ jobs:
                         echo INside creating
                         #create entity array
                         #extract host config from yaml file
-                        hs="${diff_hs%_set}" yq '.host-catalog.hosts[] | select(.name==env(hs))' $val > data.yaml
+                        h="${diff_hs%_set}" yq '.host-catalog.hosts[] | select(.name==env(h))' $val > data.yaml
 
                         pID=$project_id hcID=$host_catalog_id yq -i '.items += {"project_id":strenv(pID),"host_catalog_id":strenv(hcID),"host":load("data.yaml")}' create_entities.yaml
 
