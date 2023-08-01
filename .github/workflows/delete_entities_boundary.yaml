@@ -1,0 +1,52 @@
+name: Delete items in Boundary
+
+on:
+  workflow_call:
+    inputs:
+      BOUNDARY_URL:
+        required: true
+        type: string
+      VAULT_URL:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+
+
+jobs:
+  build:
+    runs-on: self-hosted
+    name: Deleting Entities in Boundary
+    steps:
+      - name: Echo the data file
+        run: |
+            for del_entity in $( yq ".items" delete_entities.yaml);
+            do
+                  #delete host
+                  curl --header "Authorization: Bearer ${ secrets.token }" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/hosts/$( yq ".host_id" del_entity)
+
+                  #delete host-set
+                  curl --header "Authorization: Bearer ${ secrets.token }" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/host-sets/$( yq ".host_set_id" del_entity)
+
+                  #delete target
+                  curl --header "Authorization: Bearer ${ secrets.token }" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/targets/$( yq ".target_id" del_entity)
+
+                  #delete credential store
+                  curl --header "Authorization: Bearer ${ secrets.token }" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/credential-stores/$( yq ".cred_store_id" del_entity)
+
+                  #delete db_role from vault
+                  curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE ${{ inputs.VAULT_URL }}/v1/database/roles/$( yq ".vault_db_role" del_entity)
+
+                  #delete db_connection from vault
+                  curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE ${{ inputs.VAULT_URL }}/v1/database/config/$( yq ".vault_db_config" del_entity)
+
+                  #delete boundary access policy from vault
+                  curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE ${{ inputs.VAULT_URL }}/v1/sys/policies/acl/$( yq ".vault_db_policy" del_entity)
+
+            done
+
+
+
+
+
