@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Echo the data file
         run: |
-            for del_entity in $( yq ".items" delete_entities.yaml)
+            for del_entity in $( yq ".items" delete_entities.yaml);
             do
                   echo $del_entity
 
