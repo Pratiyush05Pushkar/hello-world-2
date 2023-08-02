@@ -62,6 +62,9 @@ jobs:
               entityId=$entity_id_to_del_trim
             }
 
+
+            echo "items:" > delete_entities.yaml
+            echo "items:" > create_entities.yaml
             for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
             do
                 echo $val
@@ -108,8 +111,6 @@ jobs:
                 diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
 
                 echo $diff_host_set
-                echo "items:" > delete_entities.yaml
-                echo "items:" > create_entities.yaml
 
                 for diff_hs in $diff_host_set
                 do
