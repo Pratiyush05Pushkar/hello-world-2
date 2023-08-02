@@ -181,12 +181,11 @@ jobs:
     secrets:
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
   call-create-workflow:
-    needs: build_script
+    needs: [ build_script , call-delete-workflow ]
     uses: ./.github/workflows/create_entities_boundary.yaml
     with:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
-      TOKEN: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
     secrets:
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
 
