@@ -14,7 +14,7 @@ host-catalog:
               - name: nms_postgres_v89229
                 description: descri st_name /optional
                 address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
-                database_name: sqlpad
+                database_name:
                 username: livspace
                 password: LivspaceRandomInfra12345
                 default_port: 5432
