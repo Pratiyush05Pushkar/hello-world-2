@@ -9,6 +9,9 @@ on:
       VAULT_URL:
         required: true
         type: string
+      TOKEN:
+        required: true
+        type: string
     secrets:
       token:
         required: true
@@ -21,6 +24,7 @@ jobs:
     steps:
       - name: Echo the data file
         run: |
+            echo ${{ inputs.BOUNDARY_URL }}
             no_of_items=$( yq ".items | length " create_entities.yaml)
 
             for ((i=0 ; i<no_of_items ; i++))
