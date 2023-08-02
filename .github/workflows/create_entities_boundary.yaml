@@ -34,7 +34,7 @@ jobs:
                   host_description=$( yq ".items[$i].host.description" create_entities.yaml)
                   host_ip=$( yq ".items[$i].host.address" create_entities.yaml)
                   echo "{\"attributes\":{\"address\":\"${host_ip}\"},\"type\":\"static\",\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_name}\",\"description\":\"${host_description}\"}" > host.json
-                  echo $(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @host.json ${{ inputs.BOUNDARY_URL }}/v1/hosts | jq '.id' )
+                  echo ${{ inputs.BOUNDARY_URL }}/v1/hosts ${{ secrets.token }}
                   host_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @host.json ${{ inputs.BOUNDARY_URL }}/v1/hosts | jq '.id' )
                   echo Host $host_id
 
