@@ -31,9 +31,8 @@ jobs:
             vault_db_connections=($( yq ".items[].vault_db_connection" delete_entities.yaml))
             vault_db_policys=($( yq ".items[].vault_db_policy" delete_entities.yaml))
 
-            for i in ${!host_ids[@]}; do
+            for i in ${!host_ids[@]};
             do
-
                   #delete host
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/hosts/${host_ids[$i]}
 
