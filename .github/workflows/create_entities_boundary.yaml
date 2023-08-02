@@ -55,9 +55,11 @@ jobs:
                   read_target_name="$( echo $host_name )_read_target"
                   read_target_description="$( yq ".items[$i].host_catalog_name" create_entities.yaml) DB"
                   read_target_port=$(yq ".items[$i].host.default_port" data.yaml)
+                  echo $read_target_port
                   echo "{\"attributes\":{\"default_port\":${read_target_port}},\"type\":\"tcp\",\"name\":\"${read_target_name}\",\"description\":\"${read_target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
-                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json ${{ inputs.BOUNDARY_URL }}/v1/targets
-                  read_target_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json ${{ inputs.BOUNDARY_URL }}/v1/targets | jq '.id' )
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json ${{ inputs.BOUNDARY_URL }}/v1/targets > resp.json
+                  cat resp.json
+                  read_target_id=(jq '.id' resp.json)
                   echo Read target $read_target_id
 
                   #create write target
