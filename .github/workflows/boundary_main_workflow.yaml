@@ -8,7 +8,7 @@ jobs:
     runs-on: self-hosted
     name: Main worlflow
     outputs:
-        BOUNDARY_TOKEN: ${{ steps.main_workflow.outputs.BOUNDARY_TOKEN }}
+        ENGINEERING_BOUNDARY_TOKEN: ${{ steps.set_outputs.outputs.ENGINEERING_BOUNDARY_TOKEN }}
     steps:
       - uses: dcarbone/install-yq-action@v1.0.0
       - uses: dcarbone/install-jq-action@v1.0.1
