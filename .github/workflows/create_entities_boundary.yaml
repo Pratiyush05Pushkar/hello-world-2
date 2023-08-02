@@ -21,13 +21,10 @@ jobs:
     steps:
       - name: Echo the data file
         run: |
-            readonly token=${{ secrets.token }}
             readonly BOUNDARY_URL=${{ inputs.BOUNDARY_URL}}
             readonly VAULT_URL=${{ inputs.VAULT_URL}}
 
             no_of_items=$( yq ".items | length " create_entities.yaml)
-            # project_ids=$( yq ".items[].project_id" create_entities.yaml)
-            # project_ids=$( yq ".items[].project_id" create_entities.yaml)
 
             for ((i=0 ; i<no_of_items ; i++))
             do
@@ -35,41 +32,42 @@ jobs:
                   project_id=$( yq ".items[$i].project_id" create_entities.yaml)
                   host_catalog_id=$( yq ".items[$i].host_catalog_id" create_entities.yaml)
 
-                  cred_lib_read="$( echo $host_name )_cred_lib_read"
-                  cred_lib_write="$( echo $host_name )_cred_lib_write"
-
                   #create host
                   host_name=$( yq ".items[$i].host.name" create_entities.yaml)
                   host_description=$( yq ".items[$i].host.description" create_entities.yaml)
                   host_ip=$( yq ".items[$i].host.address" create_entities.yaml)
                   echo "{\"attributes\":{\"address\":\"${host_ip}\"},\"type\":\"static\",\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_name}\",\"description\":\"${host_description}\"}" > host.json
-                  host_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host.json $BOUNDARY_URL/v1/hosts | jq '.id' )
+                  host_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @host.json $BOUNDARY_URL/v1/hosts | jq '.id' )
+                  echo Host $host_id
 
                   #create host-set
                   host_set_name="$( echo $host_name )_set"
                   host_set_description=$( yq ".items[$i].host.description" create_entities.yaml)
                   echo "{\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_set_name}\",\"description\":\"${host_set_description}\"}" > new_host_set.json
-                  host_set_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @new_host_set.json $BOUNDARY_URL/v1/host-sets | jq '.id' )
+                  host_set_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @new_host_set.json $BOUNDARY_URL/v1/host-sets | jq '.id' )
+                  echo Host-set $host_set_id
 
                   #add host to host-set
                   echo "{\"version\":1,\"host_ids\":[${host_id}]}" > add_host_to_host_set.json
                   host_set_id_trim="${host_set_id%\"}"
                   host_set_id_trim="${host_set_id_trim#\"}"
-                  curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_to_host_set.json $BOUNDARY_URL/v1/host-sets/$host_set_id_trim:add-hosts
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_host_to_host_set.json $BOUNDARY_URL/v1/host-sets/$host_set_id_trim:add-hosts
 
                   #create read target
                   read_target_name="$( echo $host_name )_read_target"
                   read_target_description="$( yq ".items[$i].host_catalog_name" create_entities.yaml) DB"
                   read_target_port=$(yq ".items[$i].host.default_port" data.yaml)
                   echo "{\"attributes\":{\"default_port\":${read_target_port}},\"type\":\"tcp\",\"name\":\"${read_target_name}\",\"description\":\"${read_target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
-                  read_target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json $BOUNDARY_URL/v1/targets | jq '.id' )
+                  read_target_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json $BOUNDARY_URL/v1/targets | jq '.id' )
+                  echo Read target $read_target_id
 
                   #create write target
                   write_target_name="$( echo $host_name )_write_target"
                   write_target_description="$( yq ".items[$i].host_catalog_name" create_entities.yaml) DB"
                   write_target_port=$(yq ".items[$i].host.default_port" data.yaml)
                   echo "{\"attributes\":{\"default_port\":${write_target_port}},\"type\":\"tcp\",\"name\":\"${write_target_name}\",\"description\":\"${write_target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
-                  write_target_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @target.json $BOUNDARY_URL/v1/targets | jq '.id' )
+                  write_target_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json $BOUNDARY_URL/v1/targets | jq '.id' )
+                  echo Write target $write_target_id
 
                   #add host-set in READ + WRITE target
                   echo "{\"version\":1,\"host_source_ids\":[${host_set_id}]}" > add_host_set_to_target.json
@@ -77,8 +75,8 @@ jobs:
                   read_target_id_trim="${read_target_id_trim#\"}"
                   write_target_id_trim="${write_target_id%\"}"
                   write_target_id_trim="${write_target_id_trim#\"}"
-                  curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json $BOUNDARY_URL/v1/targets/$read_target_id_trim:add-host-sources
-                  curl --header "Authorization: Bearer ${token}" --request POST --data @add_host_set_to_target.json $BOUNDARY_URL/v1/targets/$write_target_id_trim:add-host-sources
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_host_set_to_target.json $BOUNDARY_URL/v1/targets/$read_target_id_trim:add-host-sources
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_host_set_to_target.json $BOUNDARY_URL/v1/targets/$write_target_id_trim:add-host-sources
                   rm -f add_host_set_to_target.json
 
                   db_connection_name="$( echo $host_name )_db"
@@ -141,26 +139,26 @@ jobs:
                   #Create credential store in boundary
                   credential_store_name="$( echo $host_name )_cred_store"
                   echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"$VAULT_URL/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_id}\"}" > credential_store_payload.json
-                  credential_store_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @credential_store_payload.json $BOUNDARY_URL/v1/credential-stores | jq '.id' )
+                  credential_store_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @credential_store_payload.json $BOUNDARY_URL/v1/credential-stores | jq '.id' )
                   echo Credential_store_id created is $credential_store_id
 
                   #create READ credential library
                   read_cred_lib="$( echo $host_name )_read_cred_lib"
                   echo "{\"type\":\"vault\",\"credential_store_id\":${credential_store_id},\"name\":\"${read_cred_lib}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_read_role}\"}}" > cred_lib_info.json
-                  read_cred_lib_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json $BOUNDARY_URL/v1/credential-libraries | jq '.id' )
+                  read_cred_lib_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @cred_lib_info.json $BOUNDARY_URL/v1/credential-libraries | jq '.id' )
 
                   #create WRITE credential library
                   write_cred_lib="$( echo $host_name )_write_cred_lib"
                   echo "{\"type\":\"vault\",\"credential_store_id\":${credential_store_id},\"name\":\"${write_cred_lib}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_write_role}\"}}" > cred_lib_info.json
-                  write_cred_lib_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @cred_lib_info.json $BOUNDARY_URL/v1/credential-libraries | jq '.id' )
+                  write_cred_lib_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @cred_lib_info.json $BOUNDARY_URL/v1/credential-libraries | jq '.id' )
 
                   #add READ credential library to READ target
                   echo "{\"version\":2,\"application_credential_source_ids\":[${read_cred_lib_id}]}" > add_cred_lib_to_target.json
-                  curl --header "Authorization: Bearer ${token}" --request POST --data @add_cred_lib_to_target.json $BOUNDARY_URL/v1/targets/$read_target_id_trim:add-credential-sources
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_cred_lib_to_target.json $BOUNDARY_URL/v1/targets/$read_target_id_trim:add-credential-sources
 
                   #add WRITE credential library to WRITE target
                   echo "{\"version\":2,\"application_credential_source_ids\":[${write_cred_lib_id}]}" > add_cred_lib_to_target.json
-                  curl --header "Authorization: Bearer ${token}" --request POST --data @add_cred_lib_to_target.json $BOUNDARY_URL/v1/targets/$write_target_id_trim:add-credential-sources
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_cred_lib_to_target.json $BOUNDARY_URL/v1/targets/$write_target_id_trim:add-credential-sources
 
                   echo Successfully created host - $host_id , host-set - $host_set_id , targets - $read_target_id , $write_target_id , cred_store - $credential_store_id , cred_lib - $read_cred_lib_id , $write_cred_lib_id
             done

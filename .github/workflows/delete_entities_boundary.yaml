@@ -35,31 +35,39 @@ jobs:
             do
                   #delete host
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/hosts/${host_ids[$i]}
+                  echo Host deleted
 
                   #delete host-set
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/host-sets/${host_set_ids[$i]}
+                  echo Host-set deleted
 
                   #delete read target
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/targets/${read_target_ids[$i]}
+                  echo Read target deleted
 
                   #delete write target
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/targets/${write_target_ids[$i]}
+                  echo Write target deleted
 
                   #delete credential store
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request DELETE ${{ inputs.BOUNDARY_URL }}/v1/credential-stores/${cred_store_ids[$i]}
+                  echo credential store deleted
 
                   #delete read_db_role from vault
                   curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE ${{ inputs.VAULT_URL }}/v1/database/roles/${vault_db_read_roles[$i]}
+                  echo read_db_role deleted
 
                   #delete write_db_role from vault
                   curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE ${{ inputs.VAULT_URL }}/v1/database/roles/${vault_db_write_roles[$i]}
+                  echo write_db_role deleted
 
                   #delete db_connection from vault
                   curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE ${{ inputs.VAULT_URL }}/v1/database/config/${vault_db_connections[$i]}
+                  echo db_connection deleted
 
                   #delete boundary access policy from vault
                   curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE ${{ inputs.VAULT_URL }}/v1/sys/policies/acl/${vault_db_policys[$i]}
-
+                  echo Policy deleted
             done
 
 
