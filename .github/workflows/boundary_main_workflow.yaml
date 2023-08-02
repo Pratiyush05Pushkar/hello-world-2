@@ -186,6 +186,7 @@ jobs:
     with:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
+      TOKEN: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
     secrets:
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
 
