@@ -51,7 +51,7 @@ jobs:
             readonly VAULT_URL="http://127.0.0.1:8200";
 
             #updateTargetsInAllScopes(prod_project_id, stage_project_id, scope_name)
-            updateTargetInAllScope(){
+            updateTargetsInAllScopes(){
               token=""
               if [ $3 == "ENGINEERING" ] ;
               then
