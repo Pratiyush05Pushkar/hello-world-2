@@ -12,7 +12,8 @@ on:
     secrets:
       token:
         required: true
-
+      VAULT_TOKEN:
+        required: true
 
 jobs:
   build:
