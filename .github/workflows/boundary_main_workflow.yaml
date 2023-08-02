@@ -47,140 +47,153 @@ jobs:
             #globally used constants
             readonly STAGE_PROJECT_ID="p_Jv4BjggzW9";
             readonly PROD_PROJECT_ID="p_HBZMfr6PcE";
-            readonly AUTH_ID="ampw_sC1BbzThIj"
             readonly BOUNDARY_URL="http://127.0.0.1:9200";
             readonly VAULT_URL="http://127.0.0.1:8200";
 
-            token=${{ steps.set_outputs.outputs.ENGINEERING_BOUNDARY_TOKEN }}
+            #updateTargetsInAllScopes(prod_project_id, stage_project_id, scope_name)
+            updateTargetInAllScope(){
+              token=""
+              if [ $3 == "ENGINEERING" ] ;
+              then
+                token=${{ steps.set_outputs.outputs.ENGINEERING_BOUNDARY_TOKEN }}
+              else
+                token=${{ steps.set_outputs.outputs.BUSINESS_BOUNDARY_TOKEN }}
+              fi
 
-            #get Entity Id in Boundary
-            entityId=""
-            getEntityId(){
-              entity_id_to_del=$(jq -r --arg entity_name $2 '.items[] | select(.name==$entity_name) | .id' $1)
-              entity_id_to_del_trim="${entity_id_to_del%\"}"
-              entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
-              entityId=$entity_id_to_del_trim
+              #get Entity Id in Boundary
+              entityId=""
+              getEntityId(){
+                entity_id_to_del=$(jq -r --arg entity_name $2 '.items[] | select(.name==$entity_name) | .id' $1)
+                entity_id_to_del_trim="${entity_id_to_del%\"}"
+                entity_id_to_del_trim="${entity_id_to_del_trim#\"}"
+                entityId=$entity_id_to_del_trim
+              }
+
+
+              echo "items:" > $3_delete_entities.yaml
+              echo "items:" > $3_create_entities.yaml
+              for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
+              do
+                  echo $val
+                  #get project id
+                  project_name=$(yq ".project" $val)
+                  project_id=""
+                  if [ $project_name == "stage" ] ;
+                  then
+                    project_id=$2
+                  else
+                    project_id=$1
+                  fi
+                  #read host-catalog from yaml file
+                  host_catalog_name=$(yq ".host-catalog.name" $val)
+                  # host_catalog_description=$(yq ".host-catalog.description" $val)
+
+                  #get host-catalog list
+                  curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
+                  host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
+
+                  #if host-catalog doesnot exists , we need to create it
+                  if [ -z "$host_catalog_id" ] ;
+                  then
+                    echo Host_catalog_id $host_catalog_id
+                    echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
+                    host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json $BOUNDARY_URL/v1/host-catalogs | jq '.id' )
+                    rm -f host_catalog.json
+                  fi
+
+                  echo $host_catalog_id
+                  #get host-sets , hosts , targets and credential stores which are already present
+                  curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
+                  curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
+                  curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/targets?scope_id=$project_id > all_targets.json
+                  curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
+
+                  #host-sets already present in Boundary
+                  old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
+                  echo Old_host_Set_list $old_host_set_list
+
+                  #host-sets in recent yaml file
+                  new_host_set_list=$(yq '.host-catalog.hosts[].name | . + "_set"' $val)
+                  echo NEW_host_Set_list $new_host_set_list
+
+                  #diff gets us deleted host-sets and newly created host-sets
+                  diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
+
+
+                  echo $diff_host_set
+
+                  for diff_hs in $diff_host_set
+                  do
+                      if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
+                          echo Deleting entities
+
+                          #get host_id
+                          host_name="${diff_hs%_set}"
+                          getEntityId all_hosts.json $host_name
+                          host_id=$entityId
+
+                          #get host_set_id
+                          host_set_name="$( echo $host_name )_set"
+                          getEntityId all_host_sets.json $host_set_name
+                          host_set_id=$entityId
+
+                          #get target_id
+                          read_target_name="$( echo $host_name )_read_target"
+                          getEntityId all_targets.json $read_target_name
+                          read_target_id=$entityId
+
+                          write_target_name="$( echo $host_name )_write_target"
+                          getEntityId all_targets.json $write_target_name
+                          write_target_id=$entityId
+
+                          #get credential_store_id
+                          cred_store_name="$( echo $host_name )_cred_store"
+                          getEntityId all_credential_stores.json $cred_store_name
+                          cred_store_id=$entityId
+
+                          #Vault Db Read Role
+                          v_d_r_r=$( echo $host_name )_read_role
+
+                          #Vault Db Write Role
+                          v_d_w_r=$( echo $host_name )_write_role
+
+                          #Vault Db Connection
+                          v_d_c=$( echo $host_name )_db
+
+                          #Vault Db Policy
+                          v_d_p=$( echo $host_name )_db_policy
+
+                          hID=$host_id hsID=$host_set_id rTID=$read_target_id wTID=$write_target_id cID=$cred_store_id vDRR=$v_d_r_r vDWR=$v_d_w_r vDC=$v_d_c vDP=$v_d_p yq -i '.items += [{"host_id":strenv(hID),"host_set_id":strenv(hsID),"read_target_id":strenv(rTID),"write_target_id":strenv(wTID),"cred_store_id":strenv(cID),"vault_db_read_role":strenv(vDRR),"vault_db_write_role":strenv(vDWR),"vault_db_connection":strenv(vDC),"vault_db_policy":strenv(vDP)}]' $3_delete_entities.yaml
+
+                          echo Updated delete yaml $3_delete_entities.yaml
+                      else
+                          echo Creating entity
+                          #extract host config from yaml file
+                          h="${diff_hs%_set}" yq '.host-catalog.hosts[] | select(.name==env(h))' $val > data.yaml
+
+                          pID=$project_id hcID=$host_catalog_id hcN=$host_catalog_name yq -i '.items += [{"project_id":strenv(pID),"host_catalog_name":strenv(hcN),"host_catalog_id":strenv(hcID),"host":load("data.yaml")}]' $3_create_entities.yaml
+
+                          echo Updating create yaml $3_create_entities.yaml
+                      fi
+
+                  done
+              done
+
+              #Final yaml files
+              cat $3_delete_entities.yaml
+              cat $3_create_entities.yaml
             }
 
-
-            echo "items:" > delete_entities.yaml
-            echo "items:" > create_entities.yaml
-            for val in ${{ steps.changed-files-specific.outputs.all_changed_files }}
-            do
-                echo $val
-                #get project id
-                project_name=$(yq ".project" $val)
-                project_id=""
-                if [ $project_name == "stage" ] ;
-                then
-                  project_id=$STAGE_PROJECT_ID
-                else
-                  project_id=$PROD_PROJECT_ID
-                fi
-                #read host-catalog from yaml file
-                host_catalog_name=$(yq ".host-catalog.name" $val)
-                # host_catalog_description=$(yq ".host-catalog.description" $val)
-
-                #get host-catalog list
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
-                host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
-
-                #if host-catalog doesnot exists , we need to create it
-                if [ -z "$host_catalog_id" ] ;
-                then
-                  echo Host_catalog_id $host_catalog_id
-                  echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
-                  host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json $BOUNDARY_URL/v1/host-catalogs | jq '.id' )
-                  rm -f host_catalog.json
-                fi
-
-                echo $host_catalog_id
-                #get host-sets , hosts , targets and credential stores which are already present
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-sets?host_catalog_id=$host_catalog_id > all_host_sets.json
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/hosts?host_catalog_id=$host_catalog_id > all_hosts.json
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/targets?scope_id=$project_id > all_targets.json
-                curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/credential-stores?scope_id=$project_id > all_credential_stores.json
-
-                #host-sets already present in Boundary
-                old_host_set_list=$(jq -r '. | select(.items) | .items[].name' all_host_sets.json)
-                echo Old_host_Set_list $old_host_set_list
-
-                #host-sets in recent yaml file
-                new_host_set_list=$(yq '.host-catalog.hosts[].name | . + "_set"' $val)
-                echo NEW_host_Set_list $new_host_set_list
-
-                #diff gets us deleted host-sets and newly created host-sets
-                diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
+            updateTargetsInAllScopes "p_HBZMfr6PcE" "p_Jv4BjggzW9" "ENGINEERING"
 
 
-                echo $diff_host_set
-
-                for diff_hs in $diff_host_set
-                do
-                    if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
-                        echo Deleting entities
-
-                        #get host_id
-                        host_name="${diff_hs%_set}"
-                        getEntityId all_hosts.json $host_name
-                        host_id=$entityId
-
-                        #get host_set_id
-                        host_set_name="$( echo $host_name )_set"
-                        getEntityId all_host_sets.json $host_set_name
-                        host_set_id=$entityId
-
-                        #get target_id
-                        read_target_name="$( echo $host_name )_read_target"
-                        getEntityId all_targets.json $read_target_name
-                        read_target_id=$entityId
-
-                        write_target_name="$( echo $host_name )_write_target"
-                        getEntityId all_targets.json $write_target_name
-                        write_target_id=$entityId
-
-                        #get credential_store_id
-                        cred_store_name="$( echo $host_name )_cred_store"
-                        getEntityId all_credential_stores.json $cred_store_name
-                        cred_store_id=$entityId
-
-                        #Vault Db Read Role
-                        v_d_r_r=$( echo $host_name )_read_role
-
-                        #Vault Db Write Role
-                        v_d_w_r=$( echo $host_name )_write_role
-
-                        #Vault Db Connection
-                        v_d_c=$( echo $host_name )_db
-
-                        #Vault Db Policy
-                        v_d_p=$( echo $host_name )_db_policy
-
-                        hID=$host_id hsID=$host_set_id rTID=$read_target_id wTID=$write_target_id cID=$cred_store_id vDRR=$v_d_r_r vDWR=$v_d_w_r vDC=$v_d_c vDP=$v_d_p yq -i '.items += [{"host_id":strenv(hID),"host_set_id":strenv(hsID),"read_target_id":strenv(rTID),"write_target_id":strenv(wTID),"cred_store_id":strenv(cID),"vault_db_read_role":strenv(vDRR),"vault_db_write_role":strenv(vDWR),"vault_db_connection":strenv(vDC),"vault_db_policy":strenv(vDP)}]' delete_entities.yaml
-
-                        echo Updated delete yaml $delete_entities.yaml
-                    else
-                        echo Creating entity
-                        #extract host config from yaml file
-                        h="${diff_hs%_set}" yq '.host-catalog.hosts[] | select(.name==env(h))' $val > data.yaml
-
-                        pID=$project_id hcID=$host_catalog_id hcN=$host_catalog_name yq -i '.items += [{"project_id":strenv(pID),"host_catalog_name":strenv(hcN),"host_catalog_id":strenv(hcID),"host":load("data.yaml")}]' create_entities.yaml
-
-                        echo Updating create yaml $create_entities.yaml
-                    fi
-
-                done
-            done
-
-            #Final yaml files
-            cat delete_entities.yaml
-            cat create_entities.yaml
   call-delete-workflow:
     needs: build_script
     uses: ./.github/workflows/delete_entities_boundary.yaml
     with:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
+      REALM: "ENGINEERING"
     secrets:
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
       VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
@@ -190,6 +203,7 @@ jobs:
     with:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
+      REALM: "ENGINEERING"
     secrets:
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
       VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}

@@ -9,6 +9,9 @@ on:
       VAULT_URL:
         required: true
         type: string
+      REALM:
+        required: true
+        type: string
     secrets:
       token:
         required: true
@@ -23,15 +26,15 @@ jobs:
     steps:
       - name: Echo the data file
         run: |
-            host_ids=($( yq ".items[].host_id" delete_entities.yaml))
-            host_set_ids=($( yq ".items[].host_set_id" delete_entities.yaml))
-            read_target_ids=($( yq ".items[].read_target_id" delete_entities.yaml))
-            write_target_ids=($( yq ".items[].write_target_id" delete_entities.yaml))
-            cred_store_ids=($( yq ".items[].cred_store_id" delete_entities.yaml))
-            vault_db_read_roles=($( yq ".items[].vault_db_read_role" delete_entities.yaml))
-            vault_db_write_roles=($( yq ".items[].vault_db_write_role" delete_entities.yaml))
-            vault_db_connections=($( yq ".items[].vault_db_connection" delete_entities.yaml))
-            vault_db_policys=($( yq ".items[].vault_db_policy" delete_entities.yaml))
+            host_ids=($( yq ".items[].host_id" ${{ inputs.REALM }}_delete_entities.yaml))
+            host_set_ids=($( yq ".items[].host_set_id" ${{ inputs.REALM }}_delete_entities.yaml))
+            read_target_ids=($( yq ".items[].read_target_id" ${{ inputs.REALM }}_delete_entities.yaml))
+            write_target_ids=($( yq ".items[].write_target_id" ${{ inputs.REALM }}_delete_entities.yaml))
+            cred_store_ids=($( yq ".items[].cred_store_id" ${{ inputs.REALM }}_delete_entities.yaml))
+            vault_db_read_roles=($( yq ".items[].vault_db_read_role" ${{ inputs.REALM }}_delete_entities.yaml))
+            vault_db_write_roles=($( yq ".items[].vault_db_write_role" ${{ inputs.REALM }}_delete_entities.yaml))
+            vault_db_connections=($( yq ".items[].vault_db_connection" ${{ inputs.REALM }}_delete_entities.yaml))
+            vault_db_policys=($( yq ".items[].vault_db_policy" ${{ inputs.REALM }}_delete_entities.yaml))
 
             for i in ${!host_ids[@]};
             do

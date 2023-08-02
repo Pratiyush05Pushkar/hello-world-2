@@ -9,6 +9,9 @@ on:
       VAULT_URL:
         required: true
         type: string
+      REALM:
+        required: true
+        type: string
     secrets:
       token:
         required: true
@@ -27,21 +30,20 @@ jobs:
             for ((i=0 ; i<no_of_items ; i++))
             do
 
-                  project_id=$( yq ".items[$i].project_id" create_entities.yaml)
-                  host_catalog_id=$( yq ".items[$i].host_catalog_id" create_entities.yaml)
+                  project_id=$( yq ".items[$i].project_id" ${{ inputs.REALM }}_create_entities.yaml)
+                  host_catalog_id=$( yq ".items[$i].host_catalog_id" ${{ inputs.REALM }}_create_entities.yaml)
 
                   #create host
-                  host_name=$( yq ".items[$i].host.name" create_entities.yaml)
-                  host_description=$( yq ".items[$i].host.description" create_entities.yaml)
-                  host_ip=$( yq ".items[$i].host.address" create_entities.yaml)
+                  host_name=$( yq ".items[$i].host.name" ${{ inputs.REALM }}_create_entities.yaml)
+                  host_description=$( yq ".items[$i].host.description" ${{ inputs.REALM }}_create_entities.yaml)
+                  host_ip=$( yq ".items[$i].host.address" ${{ inputs.REALM }}_create_entities.yaml)
                   echo "{\"attributes\":{\"address\":\"${host_ip}\"},\"type\":\"static\",\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_name}\",\"description\":\"${host_description}\"}" > host.json
-                  echo ${{ inputs.BOUNDARY_URL }}/v1/hosts ${{ secrets.token }}
                   host_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @host.json ${{ inputs.BOUNDARY_URL }}/v1/hosts | jq '.id' )
                   echo Host $host_id
 
                   #create host-set
                   host_set_name="$( echo $host_name )_set"
-                  host_set_description=$( yq ".items[$i].host.description" create_entities.yaml)
+                  host_set_description=$( yq ".items[$i].host.description" ${{ inputs.REALM }}_create_entities.yaml)
                   echo "{\"host_catalog_id\":\"${host_catalog_id}\",\"name\":\"${host_set_name}\",\"description\":\"${host_set_description}\"}" > new_host_set.json
                   host_set_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @new_host_set.json ${{ inputs.BOUNDARY_URL }}/v1/host-sets | jq '.id' )
                   echo Host-set $host_set_id
@@ -54,19 +56,16 @@ jobs:
 
                   #create read target
                   read_target_name="$( echo $host_name )_read_target"
-                  read_target_description="$( yq ".items[$i].host_catalog_name" create_entities.yaml) DB"
-                  read_target_port=$(yq ".items[$i].host.default_port" create_entities.yaml)
-                  echo $read_target_port
+                  read_target_description="$( yq ".items[$i].host_catalog_name" ${{ inputs.REALM }}_create_entities.yaml) DB"
+                  read_target_port=$(yq ".items[$i].host.default_port" ${{ inputs.REALM }}_create_entities.yaml)
                   echo "{\"attributes\":{\"default_port\":${read_target_port}},\"type\":\"tcp\",\"name\":\"${read_target_name}\",\"description\":\"${read_target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
-                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json ${{ inputs.BOUNDARY_URL }}/v1/targets > resp.json
-                  cat resp.json
-                  read_target_id=$(jq '.id' resp.json)
+                  read_target_id=$( curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json ${{ inputs.BOUNDARY_URL }}/v1/targets | jq '.id' )
                   echo Read target $read_target_id
 
                   #create write target
                   write_target_name="$( echo $host_name )_write_target"
-                  write_target_description="$( yq ".items[$i].host_catalog_name" create_entities.yaml) DB"
-                  write_target_port=$(yq ".items[$i].host.default_port" create_entities.yaml)
+                  write_target_description="$( yq ".items[$i].host_catalog_name" ${{ inputs.REALM }}_create_entities.yaml) DB"
+                  write_target_port=$(yq ".items[$i].host.default_port" ${{ inputs.REALM }}_create_entities.yaml)
                   echo "{\"attributes\":{\"default_port\":${write_target_port}},\"type\":\"tcp\",\"name\":\"${write_target_name}\",\"description\":\"${write_target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
                   write_target_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json ${{ inputs.BOUNDARY_URL }}/v1/targets | jq '.id' )
                   echo Write target $write_target_id
@@ -84,9 +83,9 @@ jobs:
                   db_connection_name="$( echo $host_name )_db"
                   db_credential_read_role="$( echo $host_name )_read_role"
                   db_credential_write_role="$( echo $host_name )_write_role"
-                  db_engine=$( yq ".items[$i].host.db_engine" create_entities.yaml)
-                  host_username=$( yq ".items[$i].host.username" create_entities.yaml)
-                  host_password=$( yq ".items[$i].host.password" create_entities.yaml)
+                  db_engine=$( yq ".items[$i].host.db_engine" ${{ inputs.REALM }}_create_entities.yaml)
+                  host_username=$( yq ".items[$i].host.username" ${{ inputs.REALM }}_create_entities.yaml)
+                  host_password=$( yq ".items[$i].host.password" ${{ inputs.REALM }}_create_entities.yaml)
 
                   if [ $db_engine == "mysql" ] ;then
 
