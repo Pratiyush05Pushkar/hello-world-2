@@ -88,18 +88,22 @@ jobs:
                   fi
                   #read host-catalog from yaml file
                   host_catalog_name=$(yq ".host-catalog.name" $val)
-                  # host_catalog_description=$(yq ".host-catalog.description" $val)
+                  host_catalog_description=$(yq ".host-catalog.description" $val)
 
                   #get host-catalog list
                   curl --header "Authorization: Bearer ${token}" --request GET $BOUNDARY_URL/v1/host-catalogs?scope_id=$project_id > all_host_catalogs.json
-                  host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[] | select(.name==$hc_name) | .id' all_host_catalogs.json)
+                  host_catalog_id=""
+                  host_catalog_name_list=$(jq ".items[].name" all_host_catalogs.json)
 
                   #if host-catalog doesnot exists , we need to create it
-                  if [ -z "$host_catalog_id" ] ;
-                  then
-                    echo Host_catalog_id $host_catalog_id
+                  if [[ $( echo $host_catalog_name_list | grep $host_catalog_name ) ]]; then
+                    host_catalog_id=$(jq -r --arg hc_name $host_catalog_name '.items[]? | select(.name==$hc_name) | .id' all_host_catalogs.json)
+                  else
+                    echo Near to create Host_catalog_id $host_catalog_id
                     echo "{\"type\":\"static\",\"name\":\"${host_catalog_name}\",\"description\":\"${host_catalog_description}\",\"scope_id\":\"${project_id}\"}" > host_catalog.json
                     host_catalog_id=$(curl --header "Authorization: Bearer ${token}" --request POST --data @host_catalog.json $BOUNDARY_URL/v1/host-catalogs | jq '.id' )
+                    host_catalog_id_trim="${host_catalog_id%\"}"
+                    host_catalog_id="${host_catalog_id_trim#\"}"
                     rm -f host_catalog.json
                   fi
 
