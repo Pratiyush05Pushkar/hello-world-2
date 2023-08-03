@@ -188,7 +188,7 @@ jobs:
                   then
                       echo Entered here
                       echo $new_host_set_list
-                      for hs_name in $new_host_set_list
+                      for hs_name in ${new_host_set_list[@]}
                       do
                           h_name="${hs_name%_set}"
 
