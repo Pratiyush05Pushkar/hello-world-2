@@ -195,7 +195,7 @@ jobs:
                           getEntityId all_credential_stores.json $cred_store_name
                           cred_store_id=$entityId
 
-                          h=$h_name pID=$project_id csID=$cred_store_id yq -i '.items += [{"host_name":strenv(h),"project_id":strenv(pID),"cred_store_id:strenv(csID)"}]' $3_patch_entities.yaml
+                          h=$h_name pID=$project_id csID=$cred_store_id yq -i '.items += [{"host_name":strenv(h),"project_id":strenv(pID),"cred_store_id":strenv(csID)}]' $3_patch_entities.yaml
                       done
                   fi
               done
