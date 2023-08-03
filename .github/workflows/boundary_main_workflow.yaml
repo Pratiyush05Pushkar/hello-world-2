@@ -186,8 +186,7 @@ jobs:
 
                   if [ ${!diff_host_set[@]} == 0 ] ;
                   then
-                      echo Entered here
-                      echo $new_host_set_list
+                      echo ${new_host_set_list[@]}
                       for hs_name in $(echo ${new_host_set_list[@]} )
                       do
                           h_name="${hs_name%_set}"
