@@ -1,5 +1,5 @@
 project: stage
-patchCount: 6
+patchCount: 7
 host-catalog:
           name: nms 2
           description: nms dbs

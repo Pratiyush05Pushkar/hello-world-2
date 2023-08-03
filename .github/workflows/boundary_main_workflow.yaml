@@ -186,10 +186,9 @@ jobs:
 
                   if [ ${!diff_host_set[@]} == 0 ] ;
                   then
-                      for hs_name in "${new_host_set_list[@]}";
+                      new_host_list=($(yq '.host-catalog.hosts[].name $val))
+                      for h_name in "${new_host_list[@]}";
                       do
-                          h_name="${hs_name%_set}"
-
                           #get credential_store_id
                           cred_store_name="$( echo $h_name )_cred_store"
                           getEntityId all_credential_stores.json $cred_store_name
