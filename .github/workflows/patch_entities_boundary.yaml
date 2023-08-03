@@ -22,7 +22,7 @@ on:
 jobs:
   build:
     runs-on: self-hosted
-    name: Deleting Entities in Boundary
+    name: Patch Entities in Boundary
     steps:
       - name: Echo the data file
         run: |
