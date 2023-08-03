@@ -1,5 +1,5 @@
 project: prod
-patchCount: 5
+patchCount: 6
 host-catalog:
           name: NMS
           description: Notification Messaging service 1
