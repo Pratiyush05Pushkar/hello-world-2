@@ -184,19 +184,20 @@ jobs:
 
                   done
 
-                  # if [ ${!diff_host_set[@]} == 0 ] ;
-                  # then
-                  #     new_host_list=($(yq '.host-catalog.hosts[].name $val ))
-                  #     for h_name in "${new_host_list[@]}";
-                  #     do
-                  #         #get credential_store_id
-                  #         cred_store_name="$( echo $h_name )_cred_store"
-                  #         getEntityId all_credential_stores.json $cred_store_name
-                  #         cred_store_id=$entityId
+                  if [ ${!diff_host_set[@]} == 0 ] ;
+                  then
+                      new_host_list=($(yq '.host-catalog.hosts[].name $val ))
 
-                  #         h=$h_name pID=$project_id csID=$cred_store_id yq -i '.items += [{"host_name":strenv(h),"project_id":strenv(pID),"cred_store_id:strenv(csID)"}]' $3_patch_entities.yaml
-                  #     done
-                  # fi
+                      for h_name in "${new_host_list[@]}"; do
+
+                          #get credential_store_id
+                          cred_store_name="$( echo $h_name )_cred_store"
+                          getEntityId all_credential_stores.json $cred_store_name
+                          cred_store_id=$entityId
+
+                          h=$h_name pID=$project_id csID=$cred_store_id yq -i '.items += [{"host_name":strenv(h),"project_id":strenv(pID),"cred_store_id:strenv(csID)"}]' $3_patch_entities.yaml
+                      done
+                  fi
               done
 
               #Final yaml files
