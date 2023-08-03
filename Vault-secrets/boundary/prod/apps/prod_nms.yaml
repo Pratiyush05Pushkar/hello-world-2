@@ -4,7 +4,7 @@ host-catalog:
           description: Notification Messaging service 1
           hosts:
               - name: nms_postgres_v51
-                description: Database - sqlpad
+                description: Dataase - sqlpad
                 address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                 database_name: sqlpad
                 username: livspace
