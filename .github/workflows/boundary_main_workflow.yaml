@@ -186,7 +186,7 @@ jobs:
 
                   if [ ${!diff_host_set[@]} == 0 ] ;
                   then
-                      new_host_list=($(yq '.host-catalog.hosts[].name $val))
+                      new_host_list=($(yq '.host-catalog.hosts[].name $val ))
                       for h_name in "${new_host_list[@]}";
                       do
                           #get credential_store_id
