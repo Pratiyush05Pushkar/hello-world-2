@@ -1,0 +1,52 @@
+name: Renew credential store token
+
+on:
+  workflow_call:
+    inputs:
+      BOUNDARY_URL:
+        required: true
+        type: string
+      VAULT_URL:
+        required: true
+        type: string
+      REALM:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+      VAULT_TOKEN:
+        required: true
+
+
+jobs:
+  build:
+    runs-on: self-hosted
+    name: Deleting Entities in Boundary
+    steps:
+      - name: Echo the data file
+        run: |
+            host_names=($( yq ".items[].host_name" ${{ inputs.REALM }}_patch_entities.yaml))
+            project_ids=($( yq ".items[].project_id" ${{ inputs.REALM }}_patch_entities.yaml))
+
+            for i in ${!host_names[@]};
+            do
+                  #generate vault token for boundary
+                  db_policy="$( echo ${host_names[$i]} )_db_policy"
+
+                  echo "{ \"policies\": [\"${db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"5h\",\"renewable\": true }" > vault_db_token_payload.json
+                  boundary_token=$(curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_db_token_payload.json ${{ inputs.VAULT_URL }}/v1/auth/token/create | jq '.auth.client_token' )
+                  echo Token to put in boundary $boundary_token
+
+                  #Update credential store in boundary
+                  credential_store_name="$( echo ${host_names[$i]} )_cred_store"
+                  echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"http://vault.default:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_ids[$i]}\"}" > credential_store_payload.json
+                  credential_store_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @credential_store_payload.json ${{ inputs.BOUNDARY_URL }}/v1/credential-stores | jq '.id' )
+                  echo Credential_store_id created is $credential_store_id
+
+            done
+
+
+
+
+

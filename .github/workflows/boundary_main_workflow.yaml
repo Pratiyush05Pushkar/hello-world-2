@@ -179,13 +179,23 @@ jobs:
                       fi
 
                   done
+
+                  if [ ${!diff_host_set[@]} == 0 ] ;
+                  then
+                      for h_name in $new_host_set_list
+                      do
+                          h=$h_name pID=$project_id yq -i '.items += [{"host_name":strenv(h),"project_id":strenv(pID)}]' $3_patch_entities.yaml
+                      done
+                  fi
               done
 
               #Final yaml files
               cat $3_delete_entities.yaml
               cat $3_create_entities.yaml
+              cat $3_patch_entities.yaml
             }
 
+            #updateTargetsInAllScopes PROD_proj_id STAGE_proj_id REALM
             updateTargetsInAllScopes "p_HBZMfr6PcE" "p_Jv4BjggzW9" "ENGINEERING"
 
 
@@ -202,6 +212,16 @@ jobs:
   call-create-workflow:
     needs: [ build_script , call-delete-workflow ]
     uses: ./.github/workflows/create_entities_boundary.yaml
+    with:
+      BOUNDARY_URL: "http://127.0.0.1:9200"
+      VAULT_URL: "http://127.0.0.1:8200"
+      REALM: "ENGINEERING"
+    secrets:
+      token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
+      VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
+  call-patch-workflow:
+    needs: build_script
+    uses: ./.github/workflows/patch_entities_boundary.yaml
     with:
       BOUNDARY_URL: "http://127.0.0.1:9200"
       VAULT_URL: "http://127.0.0.1:8200"
