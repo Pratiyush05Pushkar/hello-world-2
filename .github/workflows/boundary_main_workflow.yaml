@@ -35,7 +35,7 @@ jobs:
             echo $token
             echo "ENGINEERING_BOUNDARY_TOKEN=$( echo $token )" >> "$GITHUB_OUTPUT"
 
-            # echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
+            # echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"${{ secrets.BOUNDARY_LOGIN_PASSWORD_BUSINESS }}\"}}" > payload.json
             # curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${BUS_AUTH_ID}:authenticate > response.json
             # token=$(jq -r '.attributes.token' response.json)
             # echo $token
@@ -45,8 +45,6 @@ jobs:
         id: main_workflow
         run: |
             #globally used constants
-            readonly STAGE_PROJECT_ID="p_Jv4BjggzW9";
-            readonly PROD_PROJECT_ID="p_HBZMfr6PcE";
             readonly BOUNDARY_URL="http://127.0.0.1:9200";
             readonly VAULT_URL="http://127.0.0.1:8200";
 
