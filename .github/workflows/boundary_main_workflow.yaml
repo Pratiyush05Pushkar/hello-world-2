@@ -5,7 +5,7 @@ on: push
 
 jobs:
   build_script:
-    runs-on: arc-runner-set
+    runs-on: self-hosted
     name: Main worlflow
     outputs:
         ENGINEERING_BOUNDARY_TOKEN: ${{ steps.set_outputs.outputs.ENGINEERING_BOUNDARY_TOKEN }}
@@ -27,7 +27,7 @@ jobs:
         run: |
             readonly ENG_AUTH_ID="ampw_sC1BbzThIj"
             readonly BUS_AUTH_ID="XXX"
-            readonly BOUNDARY_URL="http://127.0.0.1:9200";
+            readonly BOUNDARY_URL="http://boundary-release.default:9200";
 
             echo "{\"command\":\"login\",\"token_type\":null,\"attributes\":{\"login_name\":\"admin\",\"password\":\"password\"}}" > payload.json
             curl --request POST --data @payload.json $BOUNDARY_URL/v1/auth-methods/${ENG_AUTH_ID}:authenticate > response.json
@@ -45,8 +45,8 @@ jobs:
         id: main_workflow
         run: |
             #globally used constants
-            readonly BOUNDARY_URL="http://127.0.0.1:9200";
-            readonly VAULT_URL="http://127.0.0.1:8200";
+            readonly BOUNDARY_URL="http://boundary-release.default:9200";
+            readonly VAULT_URL="http://vault.default:8200";
 
             #updateTargetsInAllScopes(prod_project_id, stage_project_id, scope_name)
             updateTargetsInAllScopes(){
@@ -212,8 +212,8 @@ jobs:
     needs: build_script
     uses: ./.github/workflows/delete_entities_boundary.yaml
     with:
-      BOUNDARY_URL: "http://127.0.0.1:9200"
-      VAULT_URL: "http://127.0.0.1:8200"
+      BOUNDARY_URL: "http://boundary-release.default:9200"
+      VAULT_URL: "http://vault.default:8200"
       REALM: "ENGINEERING"
     secrets:
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
@@ -222,8 +222,8 @@ jobs:
     needs: [ build_script , call-delete-workflow ]
     uses: ./.github/workflows/create_entities_boundary.yaml
     with:
-      BOUNDARY_URL: "http://127.0.0.1:9200"
-      VAULT_URL: "http://127.0.0.1:8200"
+      BOUNDARY_URL: "http://boundary-release.default:9200"
+      VAULT_URL: "http://vault.default:8200"
       REALM: "ENGINEERING"
     secrets:
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
@@ -232,8 +232,8 @@ jobs:
     needs: build_script
     uses: ./.github/workflows/patch_entities_boundary.yaml
     with:
-      BOUNDARY_URL: "http://127.0.0.1:9200"
-      VAULT_URL: "http://127.0.0.1:8200"
+      BOUNDARY_URL: "http://boundary-release.default:9200"
+      VAULT_URL: "http://vault.default:8200"
       REALM: "ENGINEERING"
     secrets:
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
