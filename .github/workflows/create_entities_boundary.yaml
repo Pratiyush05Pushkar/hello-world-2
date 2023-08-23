@@ -23,6 +23,8 @@ jobs:
     runs-on: self-hosted
     name: Create entities in Boundary
     steps:
+      - uses: dcarbone/install-yq-action@v1.0.0
+      - uses: dcarbone/install-jq-action@v1.0.1
       - name: Echo the data file
         run: |
             no_of_items=$( yq ".items | length " ${{ inputs.REALM }}_create_entities.yaml)

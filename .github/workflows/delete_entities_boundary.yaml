@@ -24,6 +24,8 @@ jobs:
     runs-on: self-hosted
     name: Delete Entities in Boundary
     steps:
+      - uses: dcarbone/install-yq-action@v1.0.0
+      - uses: dcarbone/install-jq-action@v1.0.1
       - name: Echo the data file
         run: |
             host_ids=($( yq ".items[].host_id" ${{ inputs.REALM }}_delete_entities.yaml))
