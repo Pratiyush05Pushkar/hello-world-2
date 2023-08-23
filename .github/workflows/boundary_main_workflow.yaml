@@ -5,7 +5,7 @@ on: push
 
 jobs:
   build_script:
-    runs-on: self-hosted
+    runs-on: arc-runner-set
     name: Main worlflow
     outputs:
         ENGINEERING_BOUNDARY_TOKEN: ${{ steps.set_outputs.outputs.ENGINEERING_BOUNDARY_TOKEN }}
