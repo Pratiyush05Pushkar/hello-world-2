@@ -206,8 +206,11 @@ jobs:
 
             #updateTargetsInAllScopes PROD_proj_id STAGE_proj_id REALM
             updateTargetsInAllScopes "p_HBZMfr6PcE" "p_Jv4BjggzW9" "ENGINEERING"
-
-
+      - name: Upload files
+        uses: actions/upload-artifact@v3
+        with:
+          name: ENGINEERING_delete_entities
+          path: ENGINEERING_delete_entities.yaml
   call-delete-workflow:
     needs: build_script
     uses: ./.github/workflows/delete_entities_boundary.yaml

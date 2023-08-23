@@ -26,6 +26,10 @@ jobs:
     steps:
       - uses: dcarbone/install-yq-action@v1.0.0
       - uses: dcarbone/install-jq-action@v1.0.1
+      - name: Download REALM delete artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ inputs.REALM }}_delete_entities
       - name: Echo the data file
         run: |
             host_ids=($( yq ".items[].host_id" ${{ inputs.REALM }}_delete_entities.yaml))
