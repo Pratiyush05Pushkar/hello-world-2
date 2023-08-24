@@ -211,17 +211,17 @@ jobs:
       - name: Upload files to cache
         uses: actions/cache@v3
         with:
-          key: ${{ github.event.number }}_ENGINEERING_delete_entities
+          key: ${{ github.sha }}_ENGINEERING_delete_entities
           path: ./ENGINEERING_delete_entities.yaml
       - name: Upload files to cache
         uses: actions/cache@v3
         with:
-          key: ${{ github.event.number }}_ENGINEERING_create_entities
+          key: ${{ github.sha }}_ENGINEERING_create_entities
           path: ./ENGINEERING_create_entities.yaml
       - name: Upload files to cache
         uses: actions/cache@v3
         with:
-          key: ${{ github.event.number }}_ENGINEERING_patch_entities
+          key: ${{ github.sha }}_ENGINEERING_patch_entities
           path: ./ENGINEERING_patch_entities.yaml
   call-delete-workflow:
     needs: build_script

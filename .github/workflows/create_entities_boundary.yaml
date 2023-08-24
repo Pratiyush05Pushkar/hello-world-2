@@ -28,7 +28,7 @@ jobs:
       - name: Restore files to cache
         uses: actions/cache@v3
         with:
-          key: ${{ github.event.number }}_${{ inputs.REALM }}_create_entities
+          key: ${{ github.sha }}_${{ inputs.REALM }}_create_entities
           path: ./${{ inputs.REALM }}_create_entities.yaml
       - name: Echo the data file
         run: |
