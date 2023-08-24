@@ -123,7 +123,7 @@ jobs:
                   #diff gets us deleted host-sets and newly created host-sets
                   diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
 
-                  updated_entities=""
+                  updated_new_entities="false"
                   echo $diff_host_set
 
                   for diff_hs in $diff_host_set
@@ -184,8 +184,9 @@ jobs:
                   done
 
                   echo Diff_hs_count $diff_hs_count
-                  if [ updated_entities == "true" ] ;
+                  if [ updated_new_entities == "false" ] ;
                   then
+                      echo "I am inside Patch scope"
                       new_host_list=($(yq '.host-catalog.hosts[].name' $val ))
 
                       for h_name in "${new_host_list[@]}"; do
