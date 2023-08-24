@@ -54,6 +54,7 @@ jobs:
 
                   echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${cred_store_description}\",\"attributes\":{\"address\":\"http://vault.default:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_ids[$i]}\"}" > credential_store_payload.json
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request PATCH --data @credential_store_payload.json ${{ inputs.BOUNDARY_URL }}/v1/credential-stores/${cred_store_ids[$i]} > output.json
+                  cat output.json
                   echo $( jq '.id' output.json )
                   #credential_store_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request PATCH --data @credential_store_payload.json ${{ inputs.BOUNDARY_URL }}/v1/credential-stores/${cred_store_ids[$i]} | jq '.id' )
                   echo Credential_store_id created is $credential_store_id
