@@ -25,7 +25,12 @@ jobs:
     steps:
       - uses: dcarbone/install-yq-action@v1.0.0
       - uses: dcarbone/install-jq-action@v1.0.1
-      - name: Create the data acc to cache files
+      - name: Restore files to cache
+        uses: actions/cache@v3
+        with:
+          key: ${{ inputs.REALM }}_create_entities
+      - name: Echo the data file
+        name: Restore files to cache
         uses: actions/cache@v3
         with:
           key: ${{ inputs.REALM }}_create_entities
