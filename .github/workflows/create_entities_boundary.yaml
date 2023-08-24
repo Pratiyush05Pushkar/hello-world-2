@@ -25,12 +25,11 @@ jobs:
     steps:
       - uses: dcarbone/install-yq-action@v1.0.0
       - uses: dcarbone/install-jq-action@v1.0.1
-      - name: Restotr files to cache
+      - name: Create the data acc to cache files
         uses: actions/cache@v3
         with:
           key: ${{ inputs.REALM }}_create_entities
           path: ./${{ inputs.REALM }}_create_entities.yaml
-      - name: Echo the data file
         run: |
             no_of_items=$( yq ".items | length " ${{ inputs.REALM }}_create_entities.yaml)
 

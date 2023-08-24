@@ -26,12 +26,11 @@ jobs:
     steps:
       - uses: dcarbone/install-yq-action@v1.0.0
       - uses: dcarbone/install-jq-action@v1.0.1
-      - name: Restore files to cache
+      - name: Delete data acc to cache files
         uses: actions/cache@v3
         with:
-          key: ${{ inputs.REALM }}_delete_entities
-          path: ./${{ inputs.REALM }}_delete_entities.yaml
-      - name: Echo the data file
+          key: ${{ inputs.REALM }}_create_entities
+          path: ./${{ inputs.REALM }}_create_entities.yaml
         run: |
             host_ids=($( yq ".items[].host_id" ${{ inputs.REALM }}_delete_entities.yaml))
             host_set_ids=($( yq ".items[].host_set_id" ${{ inputs.REALM }}_delete_entities.yaml))
