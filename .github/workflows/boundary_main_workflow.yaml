@@ -123,12 +123,12 @@ jobs:
                   #diff gets us deleted host-sets and newly created host-sets
                   diff_host_set=$(echo ${old_host_set_list[@]} ${new_host_set_list[@]} | tr ' ' '\n' | sort | uniq -u )
 
-                  diff_hs_count=0
+                  updated_entities=""
                   echo $diff_host_set
 
                   for diff_hs in $diff_host_set
                   do
-                      diff_hs_count = diff_hs_count + 1
+                      updated_entities="true"
                       if [[ $( echo $old_host_set_list | grep $diff_hs ) ]]; then
                           echo Deleting entities
 
@@ -184,7 +184,7 @@ jobs:
                   done
 
                   echo Diff_hs_count $diff_hs_count
-                  if [ diff_hs_count == 0 ] ;
+                  if [ updated_entities == "true" ] ;
                   then
                       new_host_list=($(yq '.host-catalog.hosts[].name' $val ))
 
