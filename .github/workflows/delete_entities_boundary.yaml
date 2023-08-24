@@ -30,8 +30,11 @@ jobs:
         uses: actions/cache@v3
         with:
           key: ${{ inputs.REALM }}_delete_entities
+          path: ./${{ inputs.REALM }}_delete_entities.yaml
       - name: Echo the data file
         run: |
+            cat ${{ inputs.REALM }}_delete_entities.yaml
+
             host_ids=($( yq ".items[].host_id" ${{ inputs.REALM }}_delete_entities.yaml))
             host_set_ids=($( yq ".items[].host_set_id" ${{ inputs.REALM }}_delete_entities.yaml))
             read_target_ids=($( yq ".items[].read_target_id" ${{ inputs.REALM }}_delete_entities.yaml))

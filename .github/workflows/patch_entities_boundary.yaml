@@ -30,8 +30,11 @@ jobs:
         uses: actions/cache@v3
         with:
           key: ${{ inputs.REALM }}_patch_entities
+          path: ./${{ inputs.REALM }}_patch_entities.yaml
       - name: Echo the data file
         run: |
+            cat ${{ inputs.REALM }}_patch_entities.yaml
+
             host_names=($( yq ".items[].host_name" ${{ inputs.REALM }}_patch_entities.yaml))
             project_ids=($( yq ".items[].project_id" ${{ inputs.REALM }}_patch_entities.yaml))
             cred_store_ids=($( yq ".items[].cred_store_id" ${{ inputs.REALM }}_patch_entities.yaml))

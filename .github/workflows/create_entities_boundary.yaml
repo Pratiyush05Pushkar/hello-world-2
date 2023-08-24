@@ -29,10 +29,12 @@ jobs:
         uses: actions/cache@v3
         with:
           key: ${{ inputs.REALM }}_create_entities
+          path: ./${{ inputs.REALM }}_create_entities.yaml
       - name: Echo the data file
         run: |
             no_of_items=$( yq ".items | length " ${{ inputs.REALM }}_create_entities.yaml)
 
+            cat ${{ inputs.REALM }}_create_entities.yaml
             for ((i=0 ; i<no_of_items ; i++))
             do
 
