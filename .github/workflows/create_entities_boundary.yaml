@@ -30,11 +30,6 @@ jobs:
         with:
           key: ${{ inputs.REALM }}_create_entities
       - name: Echo the data file
-        name: Restore files to cache
-        uses: actions/cache@v3
-        with:
-          key: ${{ inputs.REALM }}_create_entities
-          path: ./${{ inputs.REALM }}_create_entities.yaml
         run: |
             no_of_items=$( yq ".items | length " ${{ inputs.REALM }}_create_entities.yaml)
 
