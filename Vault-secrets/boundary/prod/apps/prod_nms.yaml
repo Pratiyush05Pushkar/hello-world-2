@@ -4,7 +4,7 @@ host-catalog:
           name: NMS
           description: Notification Messaging service 1
           hosts:
-              - name: nms_postgres_v525
+              - name: nms_postgres_v5299
                 description: Dataase - sqlpad
                 address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                 database_name: sqlpad
@@ -12,7 +12,7 @@ host-catalog:
                 password: LivspaceRandomInfra12345
                 default_port: 5432
                 db_engine: postgresql
-              - name: nms_postgres_v535
+              - name: nms_postgres_v5399
                 description: Database - sqlpad
                 address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
                 database_name: sqlpad
