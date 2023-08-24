@@ -211,6 +211,16 @@ jobs:
         with:
           key: ENGINEERING_delete_entities
           path: ./ENGINEERING_delete_entities.yaml
+      - name: Upload files to cache
+        uses: actions/cache@v3
+        with:
+          key: ENGINEERING_create_entities
+          path: ./ENGINEERING_create_entities.yaml
+      - name: Upload files to cache
+        uses: actions/cache@v3
+        with:
+          key: ENGINEERING_patch_entities
+          path: ./ENGINEERING_patch_entities.yaml
   call-delete-workflow:
     needs: build_script
     uses: ./.github/workflows/delete_entities_boundary.yaml

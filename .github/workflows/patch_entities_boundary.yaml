@@ -26,6 +26,11 @@ jobs:
     steps:
       - uses: dcarbone/install-yq-action@v1.0.0
       - uses: dcarbone/install-jq-action@v1.0.1
+      - name: Restore files to cache
+        uses: actions/cache@v3
+        with:
+          key: ${{ inputs.REALM }}_patch_entities
+          path: ./${{ inputs.REALM }}_patch_entities.yaml
       - name: Echo the data file
         run: |
             host_names=($( yq ".items[].host_name" ${{ inputs.REALM }}_patch_entities.yaml))
