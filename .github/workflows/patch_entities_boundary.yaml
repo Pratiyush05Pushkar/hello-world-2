@@ -52,7 +52,7 @@ jobs:
                   credential_store_name="$( echo ${host_names[$i]} )_cred_store"
                   cred_store_description="$( echo ${host_names[$i]} ) CRED STORE"
 
-                  echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${cred_store_description}\",\"attributes\":{\"address\":\"http://vault.default:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_ids[$i]}\"}" > credential_store_payload.json
+                  echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${cred_store_description}\",\"version\":1,\"attributes\":{\"address\":\"http://vault.default:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_ids[$i]}\"}" > credential_store_payload.json
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request PATCH --data @credential_store_payload.json ${{ inputs.BOUNDARY_URL }}/v1/credential-stores/${cred_store_ids[$i]} > output.json
                   cat output.json
                   echo $( jq '.id' output.json )
