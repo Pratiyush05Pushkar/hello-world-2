@@ -83,6 +83,8 @@ jobs:
                   curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request DELETE ${{ inputs.VAULT_URL }}/v1/sys/policies/acl/${vault_db_policys[$i]}
                   echo Policy deleted
             done
+      - name: Setup gh
+        uses: wusatosi/setup-gh@v1
       - name: Delete cache file
         env:
           GH_TOKEN: ${{ secrets.DELETE_CACHE_GIT_TOKEN }}

@@ -60,6 +60,8 @@ jobs:
                   echo Credential_store_id created is $credential_store_id
 
             done
+      - name: Setup gh
+        uses: wusatosi/setup-gh@v1
       - name: Delete cache file
         env:
           GH_TOKEN: ${{ secrets.DELETE_CACHE_GIT_TOKEN }}

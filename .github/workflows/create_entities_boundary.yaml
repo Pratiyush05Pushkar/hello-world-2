@@ -172,6 +172,8 @@ jobs:
 
                   echo Successfully created host - $host_id , host-set - $host_set_id , targets - $read_target_id , $write_target_id , cred_store - $credential_store_id , cred_lib - $read_cred_lib_id , $write_cred_lib_id
             done
+      - name: Setup gh
+        uses: wusatosi/setup-gh@v1
       - name: Delete cache file
         env:
           GH_TOKEN: ${{ secrets.DELETE_CACHE_GIT_TOKEN }}
