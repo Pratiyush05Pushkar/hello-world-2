@@ -174,12 +174,7 @@ jobs:
             done
       - name: Delete cache file
         run: |
-          curl -L \
-          -X DELETE \
-          -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer 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" \
-          "https://api.github.com/repos/Pratiyush05Pushkar/hello-world-2/actions/caches?key=${{ github.sha }}_${{ inputs.REALM }}_create_entities"
-          #curl --location --request DELETE --header "Accept: application/vnd.github+json" --header "Authorization: Bearer ${{ secrets.DELETE_CACHE_GIT_TOKEN }}" "https://api.github.com/repos/Pratiyush05Pushkar/hello-world-2/actions/caches?key=${{ github.sha }}_${{ inputs.REALM }}_create_entities"
+          curl --location --request DELETE --header "Accept: application/vnd.github+json" --header "Authorization: Bearer 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" "https://api.github.com/repos/Pratiyush05Pushkar/hello-world-2/actions/caches?key=${{ github.sha }}_${{ inputs.REALM }}_create_entities"
 
 
 
