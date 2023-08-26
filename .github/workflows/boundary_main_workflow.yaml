@@ -232,6 +232,7 @@ jobs:
       VAULT_URL: "http://vault.default:8200"
       REALM: "ENGINEERING"
     secrets:
+      GIT_TOKEN: ${{ secrets.DELETE_CACHE_GIT_TOKEN }}
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
       VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
   call-create-workflow:
@@ -242,6 +243,7 @@ jobs:
       VAULT_URL: "http://vault.default:8200"
       REALM: "ENGINEERING"
     secrets:
+      GIT_TOKEN: ${{ secrets.DELETE_CACHE_GIT_TOKEN }}
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
       VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
   call-patch-workflow:
@@ -252,6 +254,7 @@ jobs:
       VAULT_URL: "http://vault.default:8200"
       REALM: "ENGINEERING"
     secrets:
+      GIT_TOKEN: ${{ secrets.DELETE_CACHE_GIT_TOKEN }}
       token: ${{ needs.build_script.outputs.ENGINEERING_BOUNDARY_TOKEN }}
       VAULT_TOKEN: ${{ secrets.VAULT_TOKEN }}
 
