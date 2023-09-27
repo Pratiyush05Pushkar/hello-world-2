@@ -3,7 +3,7 @@ host-catalog:
     name: livspace-all-mysql
     description: All Livspace staging MySQL instances
     hosts:
-      - name: livspace-staging-mysql8_v1.1
+      - name: livspace-staging-mysql8_v1.2
         description: Mysql8 Staging
         address: livspace-staging-mysql8.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
         username: livspace
