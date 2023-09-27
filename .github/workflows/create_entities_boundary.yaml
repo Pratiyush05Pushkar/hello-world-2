@@ -109,9 +109,10 @@ jobs:
                     curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_connection_payload.json ${{ inputs.VAULT_URL }}/v1/database/config/$db_connection_name
 
                     grant_field_name=""
-                    if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                    if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ;
+                    then
                       grant_field_name="engineering_grants"
-                    elif
+                    else
                       grant_field_name="business_grants"
                     fi
 
@@ -137,7 +138,7 @@ jobs:
                     #add READ + WRITE role in DB connection
                     if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
                       echo "{\"allowed_roles\":[\"${db_credential_read_role}\",\"${db_credential_write_role}\"]}" > allowed_role_payload.json
-                    elif
+                    else
                       echo "{\"allowed_roles\":[\"${db_credential_read_role}\"]}" > allowed_role_payload.json
                     fi
                     echo "{\"allowed_roles\":[\"${db_credential_read_role}\",\"${db_credential_write_role}\"]}" > allowed_role_payload.json
