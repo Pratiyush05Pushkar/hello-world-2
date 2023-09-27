@@ -162,7 +162,7 @@ jobs:
                     for ((j=0 ; j<no_of_grants ; j++))
                     do
                       read_grants+="GRANT SELECT ON "$( yq ".items[$i].host.$grant_field_name.on[$j]" ${{ inputs.REALM }}_create_entities.yaml)" TO \\\"{{name}}\\\";"
-                      write_grants+="GRANT ALL PRIVILEGES ON "$( yq ".items[$i].host.$grant_field_name.on[$j]" ${{ inputs.REALM }}_create_entities.yaml)"TO \\\"{{name}}\\\";"
+                      write_grants+="GRANT ALL PRIVILEGES ON "$( yq ".items[$i].host.$grant_field_name.on[$j]" ${{ inputs.REALM }}_create_entities.yaml)" TO \\\"{{name}}\\\";"
                     done
 
                     echo Read grants formed $read_grants
