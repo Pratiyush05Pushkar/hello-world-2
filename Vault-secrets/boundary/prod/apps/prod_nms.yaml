@@ -12,6 +12,11 @@ host-catalog:
                 password: LivspaceRandomInfra12345
                 default_port: 5432
                 db_engine: postgresql
+                engineering_grants:
+                    on:
+                    - "batches"
+                    - "cache"
+                    - "connections"
               - name: nms_postgres_v59233
                 description: Database - sqlpad
                 address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
@@ -20,3 +25,6 @@ host-catalog:
                 password: LivspaceRandomInfra12345
                 default_port: 5432
                 db_engine: postgresql
+                engineering_grants:
+                    on:
+                    - "*.*"
