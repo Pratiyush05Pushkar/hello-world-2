@@ -3,7 +3,7 @@ host-catalog:
     name: livspace-all-mysql
     description: All Livspace staging MySQL instances
     hosts:
-      - name: livspace-staging-mysql8_v1.1231
+      - name: livspace-staging-mysql8_v1.144
         description: Mysql8 Staging
         address: livspace-staging-mysql8.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
         username: livspace
@@ -12,8 +12,8 @@ host-catalog:
         db_engine: mysql
         engineering_grants:
             on:
-            - "archival.archival_data"
-            - "apollo.context_config"
+            - "cms_backend.cms_collection"
+            - "event_service.events"
       - name: livspace-alpha-mysql8_v1.55661
         description: Mysql8 Alpha
         address: livspace-alpha-mysql8-cluster.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
