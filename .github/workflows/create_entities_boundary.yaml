@@ -205,7 +205,7 @@ jobs:
 
                   #create WRITE credential library
                   write_cred_lib_id=""
-                  if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                  if [[ ${{ inputs.REALM }} == "ENGINEERING" ]] ; then
                     write_cred_lib="$( echo $host_name )_write_cred_lib"
                     echo "{\"type\":\"vault\",\"credential_store_id\":${credential_store_id},\"name\":\"${write_cred_lib}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_write_role}\"}}" > cred_lib_info.json
                     write_cred_lib_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @cred_lib_info.json ${{ inputs.BOUNDARY_URL }}/v1/credential-libraries | jq '.id' )
@@ -216,7 +216,7 @@ jobs:
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_cred_lib_to_target.json ${{ inputs.BOUNDARY_URL }}/v1/targets/$read_target_id_trim:add-credential-sources
 
                   #add WRITE credential library to WRITE target
-                  if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                  if [[ ${{ inputs.REALM }} == "ENGINEERING" ]] ; then
                     echo "{\"version\":2,\"application_credential_source_ids\":[${write_cred_lib_id}]}" > add_cred_lib_to_target.json
                     curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_cred_lib_to_target.json ${{ inputs.BOUNDARY_URL }}/v1/targets/$write_target_id_trim:add-credential-sources
                   fi
