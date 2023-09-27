@@ -3,7 +3,7 @@ host-catalog:
     name: NMS
     description: Notification Messaging service 1
     hosts:
-      - name: nms_postgres_v778
+      - name: nms_postgres_v7781
         description: Dataase - sqlpad
         address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
         database_name: sqlpad
@@ -16,7 +16,7 @@ host-catalog:
             - "batches"
             - "cache"
             - "connections"
-      - name: nms_postgres_v007
+      - name: nms_postgres_v0071
         description: Database - sqlpad
         address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
         database_name: sqlpad

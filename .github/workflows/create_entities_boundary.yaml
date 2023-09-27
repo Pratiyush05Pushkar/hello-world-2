@@ -161,11 +161,12 @@ jobs:
                     write_grants=""
                     for ((j=0 ; j<no_of_grants ; j++))
                     do
-                      GRANT SELECT ON
                       read_grants+="GRANT SELECT ON "$( yq ".items[$i].host.$grant_field_name.on[$j]" ${{ inputs.REALM }}_create_entities.yaml)" TO \\\"{{name}}\\\";"
                       write_grants+="GRANT ALL PRIVILEGES ON "$( yq ".items[$i].host.$grant_field_name.on[$j]" ${{ inputs.REALM }}_create_entities.yaml)"TO \\\"{{name}}\\\";"
                     done
 
+                    echo Read grants formed $read_grants
+                    echo Write grants $write_grants
                     #creat READ vault role for database-user creation
                     echo "{\"backend\":\"database\",\"name\":\"${db_credential_read_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE ROLE \\\"{{name}}\\\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}';$read_grants\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
                     curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_role_payload.json ${{ inputs.VAULT_URL }}/v1/database/roles/$db_credential_read_role
