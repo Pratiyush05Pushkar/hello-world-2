@@ -3,24 +3,34 @@ host-catalog:
     name: livspace-all-mysql
     description: All Livspace staging MySQL instances
     hosts:
-      - name: livspace-staging-mysql8_v1.3
+      - name: livspace-staging-mysql8_v1.4
         description: Mysql8 Staging
         address: livspace-staging-mysql8.c8nvab78etai.ap-southeast-1.rds.amazonaws.com
         username: livspace
         password: LivspaceRandomStaging123
         default_port: 3306
         db_engine: mysql
-      - name: livspace-alpha-mysql8_v1.3
+        engineering_grants:
+            on:
+            - archival.archival_data
+            - apollo.context_config
+      - name: livspace-alpha-mysql8_v1.4
         description: Mysql8 Alpha
         address: livspace-alpha-mysql8-cluster.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
         username: livspace
         password: LivspaceRandomAlpha123
         default_port: 3306
         db_engine: mysql
-      - name: livspace-beta-mysql8_v1.3
+        engineering_grants:
+            on:
+            - *.*
+      - name: livspace-beta-mysql8_v1.4
         description: Mysql8 beta
         address: livspace-beta-mysql8-cluster.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
         username: livspace
         password: LivspaceRandomBeta123
         default_port: 3306
         db_engine: mysql
+        engineering_grants:
+            on:
+            - *.*

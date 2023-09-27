@@ -77,17 +77,23 @@ jobs:
                   write_target_description="$( yq ".items[$i].host_catalog_name" ${{ inputs.REALM }}_create_entities.yaml) DB"
                   write_target_port=$(yq ".items[$i].host.default_port" ${{ inputs.REALM }}_create_entities.yaml)
                   echo "{\"attributes\":{\"default_port\":${write_target_port}},\"type\":\"tcp\",\"name\":\"${write_target_name}\",\"description\":\"${write_target_description}\",\"session_max_seconds\":28800,\"session_connection_limit\":-1,\"worker_filter\":null,\"scope_id\":\"${project_id}\"}" > target.json
-                  write_target_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json ${{ inputs.BOUNDARY_URL }}/v1/targets | jq '.id' )
+                  write_target_id=""
+                  if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                    write_target_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @target.json ${{ inputs.BOUNDARY_URL }}/v1/targets | jq '.id' )
+                  fi
                   echo Write target $write_target_id
 
                   #add host-set in READ + WRITE target
                   echo "{\"version\":1,\"host_source_ids\":[${host_set_id}]}" > add_host_set_to_target.json
                   read_target_id_trim="${read_target_id%\"}"
                   read_target_id_trim="${read_target_id_trim#\"}"
-                  write_target_id_trim="${write_target_id%\"}"
-                  write_target_id_trim="${write_target_id_trim#\"}"
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_host_set_to_target.json ${{ inputs.BOUNDARY_URL }}/v1/targets/$read_target_id_trim:add-host-sources
-                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_host_set_to_target.json ${{ inputs.BOUNDARY_URL }}/v1/targets/$write_target_id_trim:add-host-sources
+
+                  if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                    write_target_id_trim="${write_target_id%\"}"
+                    write_target_id_trim="${write_target_id_trim#\"}"
+                    curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_host_set_to_target.json ${{ inputs.BOUNDARY_URL }}/v1/targets/$write_target_id_trim:add-host-sources
+                  fi
                   rm -f add_host_set_to_target.json
 
                   db_connection_name="$( echo $host_name )_db"
@@ -102,15 +108,38 @@ jobs:
                     echo "{\"backend\":\"database\",\"name\":\"${db_connection_name}\",\"plugin_name\":\"mysql-database-plugin\",\"verify_connection\":true,\"connection_url\":\"{{username}}:{{password}}@tcp(${host_ip}:3306)\/\",\"username\":\"${host_username}\",\"password\":\"${host_password}\",\"max_open_connections\":4,\"max_idle_connections\":0,\"max_connection_lifetime\":\"0s\"}" > db_connection_payload.json
                     curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_connection_payload.json ${{ inputs.VAULT_URL }}/v1/database/config/$db_connection_name
 
-                    #creat READ vault role for database-user creation
-                    echo "{\"backend\":\"database\",\"name\":\"${db_credential_read_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT ON *.* TO '{{name}}'@'%';\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
+                    grant_field_name=""
+                    if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                      grant_field_name = "engineering_grants"
+                    elif
+                      grant_field_name = "business_grants"
+                    fi
+
+                    no_of_grants=$( yq ".items[$i].host.$grant_field_name.on | length " ${{ inputs.REALM }}_create_entities.yaml)
+                    read_grants=""
+                    write_grants=""
+                    for ((j=0 ; j<no_of_grants ; j++))
+                    do
+                      read_grants = read_grants + "GRANT SELECT ON " + $( yq ".items[$i].host.$grant_field_name.on | length " ${{ inputs.REALM }}_create_entities.yaml) + " TO '{{name}}'@'%';"
+                      write_grants = write_grants + "GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EVENT, TRIGGER, CREATE ROLE, DROP ROLE ON " + $( yq ".items[$i].host.$grant_field_name.on | length " ${{ inputs.REALM }}_create_entities.yaml) + " TO '{{name}}'@'%' WITH GRANT OPTION ;"
+                    done
+
+                    #create READ vault role for database-user creation
+                    echo "{\"backend\":\"database\",\"name\":\"${db_credential_read_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';$read_grants\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
                     curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_role_payload.json ${{ inputs.VAULT_URL }}/v1/database/roles/$db_credential_read_role
 
-                    #creat WRITE vault role for database-user creation
-                    echo "{\"backend\":\"database\",\"name\":\"${db_credential_write_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';GRANT SELECT, INSERT, UPDATE, DELETE, CREATE, DROP, RELOAD, PROCESS, REFERENCES, INDEX, ALTER, SHOW DATABASES, CREATE TEMPORARY TABLES, LOCK TABLES, EXECUTE, REPLICATION SLAVE, REPLICATION CLIENT, CREATE VIEW, SHOW VIEW, CREATE ROUTINE, ALTER ROUTINE, CREATE USER, EVENT, TRIGGER, CREATE ROLE, DROP ROLE ON *.* TO '{{name}}'@'%' WITH GRANT OPTION ;FLUSH PRIVILEGES;\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
-                    curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_role_payload.json ${{ inputs.VAULT_URL }}/v1/database/roles/$db_credential_write_role
+                    #create WRITE vault role for database-user creation
+                    if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                      echo "{\"backend\":\"database\",\"name\":\"${db_credential_write_role}\",\"type\":\"dynamic\",\"default_ttl\":\"1h\",\"max_ttl\":\"24h\",\"rotation_period\":\"24h\",\"creation_statements\":[\"CREATE USER '{{name}}'@'%' IDENTIFIED BY '{{password}}';$write_grants FLUSH PRIVILEGES;\"],\"path\":\"roles\",\"db_name\":\"${db_connection_name}\"}" > db_role_payload.json
+                      curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @db_role_payload.json ${{ inputs.VAULT_URL }}/v1/database/roles/$db_credential_write_role
+                    fi
 
                     #add READ + WRITE role in DB connection
+                    if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                      echo "{\"allowed_roles\":[\"${db_credential_read_role}\",\"${db_credential_write_role}\"]}" > allowed_role_payload.json
+                    elif
+                      echo "{\"allowed_roles\":[\"${db_credential_read_role}\"]}" > allowed_role_payload.json
+                    fi
                     echo "{\"allowed_roles\":[\"${db_credential_read_role}\",\"${db_credential_write_role}\"]}" > allowed_role_payload.json
                     curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @allowed_role_payload.json ${{ inputs.VAULT_URL }}/v1/database/config/$db_connection_name
 
@@ -160,18 +189,22 @@ jobs:
                   read_cred_lib_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @cred_lib_info.json ${{ inputs.BOUNDARY_URL }}/v1/credential-libraries | jq '.id' )
 
                   #create WRITE credential library
-                  write_cred_lib="$( echo $host_name )_write_cred_lib"
-                  echo "{\"type\":\"vault\",\"credential_store_id\":${credential_store_id},\"name\":\"${write_cred_lib}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_write_role}\"}}" > cred_lib_info.json
-                  write_cred_lib_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @cred_lib_info.json ${{ inputs.BOUNDARY_URL }}/v1/credential-libraries | jq '.id' )
+                  write_cred_lib_id=""
+                  if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                    write_cred_lib="$( echo $host_name )_write_cred_lib"
+                    echo "{\"type\":\"vault\",\"credential_store_id\":${credential_store_id},\"name\":\"${write_cred_lib}\",\"description\":\"${host_description}\",\"attributes\":{\"http_method\":\"GET\",\"path\":\"database/creds/${db_credential_write_role}\"}}" > cred_lib_info.json
+                    write_cred_lib_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @cred_lib_info.json ${{ inputs.BOUNDARY_URL }}/v1/credential-libraries | jq '.id' )
+                  fi
 
                   #add READ credential library to READ target
                   echo "{\"version\":2,\"application_credential_source_ids\":[${read_cred_lib_id}]}" > add_cred_lib_to_target.json
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_cred_lib_to_target.json ${{ inputs.BOUNDARY_URL }}/v1/targets/$read_target_id_trim:add-credential-sources
 
                   #add WRITE credential library to WRITE target
-                  echo "{\"version\":2,\"application_credential_source_ids\":[${write_cred_lib_id}]}" > add_cred_lib_to_target.json
-                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_cred_lib_to_target.json ${{ inputs.BOUNDARY_URL }}/v1/targets/$write_target_id_trim:add-credential-sources
-
+                  if [[ ${{ inputs.REALM }} == "ENGIEERING" ]] ; then
+                    echo "{\"version\":2,\"application_credential_source_ids\":[${write_cred_lib_id}]}" > add_cred_lib_to_target.json
+                    curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_cred_lib_to_target.json ${{ inputs.BOUNDARY_URL }}/v1/targets/$write_target_id_trim:add-credential-sources
+                  fi
                   echo Successfully created host - $host_id , host-set - $host_set_id , targets - $read_target_id , $write_target_id , cred_store - $credential_store_id , cred_lib - $read_cred_lib_id , $write_cred_lib_id
             done
       - name: Delete cache file
