@@ -89,6 +89,7 @@ jobs:
                   read_target_id_trim="${read_target_id_trim#\"}"
                   curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @add_host_set_to_target.json ${{ inputs.BOUNDARY_URL }}/v1/targets/$read_target_id_trim:add-host-sources
 
+                  write_target_id_trim=""
                   if [[ ${{ inputs.REALM }} == "ENGINEERING" ]] ; then
                     write_target_id_trim="${write_target_id%\"}"
                     write_target_id_trim="${write_target_id_trim#\"}"
