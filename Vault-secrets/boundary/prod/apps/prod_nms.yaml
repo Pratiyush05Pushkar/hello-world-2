@@ -16,7 +16,7 @@ host-catalog:
             - "batches"
             - "cache"
             - "connections"
-      - name: nms_postgres_v009
+      - name: nms_postgres_v0095
         description: Database - sqlpad
         address: livspace-infra-postgres10.cluster-c8nvab78etai.ap-southeast-1.rds.amazonaws.com
         database_name: sqlpad
@@ -26,4 +26,4 @@ host-catalog:
         db_engine: postgresql
         engineering_grants:
             on:
-            - "all tables"
+            - "all tables in schema public"

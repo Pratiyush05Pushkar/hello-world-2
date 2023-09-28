@@ -186,8 +186,12 @@ jobs:
                   db_policy="$( echo $host_name )_db_policy"
 
                   #Create policy for boundary to access role
-                  echo "{\"name\":\"${db_policy}\",\"policy\":\"path \\\"database/creds/${db_credential_read_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"database/creds/${db_credential_write_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\"}" > vault_boundary_policy.json
-                  curl --header "X-Vault-Token:${{ secrets.VAULT_TOKEN }}" --request POST --data @vault_boundary_policy.json ${{ inputs.VAULT_URL }}/v1/sys/policy/$db_policy
+                  if [[ ${{ inputs.REALM }} == "ENGINEERING" ]] ;
+                  then
+                    echo "{\"name\":\"${db_policy}\",\"policy\":\"path \\\"database/creds/${db_credential_read_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"database/creds/${db_credential_write_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\"}" > vault_boundary_policy.json
+                  else
+                    echo "{\"name\":\"${db_policy}\",\"policy\":\"path \\\"database/creds/${db_credential_read_role}\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/lookup-self\\\" {\n  capabilities = [\\\"read\\\"]\n}\n\npath \\\"auth/token/renew-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"auth/token/revoke-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/renew\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/leases/revoke\\\" {\n  capabilities = [\\\"update\\\"]\n}\n\npath \\\"sys/capabilities-self\\\" {\n  capabilities = [\\\"update\\\"]\n}\"}" > vault_boundary_policy.json
+                  fi
 
                   #Generate vault token
                   echo "{ \"policies\": [\"${db_policy}\"],\"no_default_policy\": true,\"no_parent\": true,\"period\": \"5h\",\"renewable\": true }" > vault_db_token_payload.json
