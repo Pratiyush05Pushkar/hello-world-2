@@ -199,9 +199,12 @@ jobs:
                   echo Token to put in boundary $boundary_token
 
                   #Create credential store in boundary
+                  echo Creating credential store
                   credential_store_name="$( echo $host_name )_cred_store"
                   echo "{\"type\":\"vault\",\"name\":\"${credential_store_name}\",\"description\":\"${host_description}\",\"attributes\":{\"address\":\"http://vault.default:8200/\",\"namespace\":null,\"ca_cert\":null,\"tls_server_name\":null,\"tls_skip_verify\":false,\"token\":${boundary_token},\"client_certificate\":null,\"client_certificate_key\":null},\"scope_id\":\"${project_id}\"}" > credential_store_payload.json
-                  credential_store_id=$(curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @credential_store_payload.json ${{ inputs.BOUNDARY_URL }}/v1/credential-stores | jq '.id' )
+                  curl --header "Authorization: Bearer ${{ secrets.token }}" --request POST --data @credential_store_payload.json ${{ inputs.BOUNDARY_URL }}/v1/credential-stores > credential_store_resp.json
+                  cat credential_store_resp.json
+                  credential_store_id=$( jq '.id' credential_store_resp.json )
                   echo Credential_store_id created is $credential_store_id
 
                   #create READ credential library
