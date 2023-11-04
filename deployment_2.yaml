@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: go-git-deployment-2
+  namespace: argocd
+  annotations:
+    notifications.argoproj.io/subscribe.on-deployed.devlake: ""
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Pratiyush05Pushkar/hello-world-2.git
+    targetRevision: HEAD
+    path: yaml-deployment
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
